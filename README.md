@@ -14,6 +14,11 @@ This app replaces the Data API bot u/MTGCardBelcher ([AetheriumSlinky/MTGCardBel
 |---|---|
 | `api.scryfall.com` | Looks up whether each called name is a real Magic card, so the reply can link to the real card's image, and fetches a random flavour text for single-card replies. One `POST /cards/collection` per reply, plus one `GET /cards/random` when a reply names a single card. No user data is sent: only the card names typed in the call. |
 
+## Terms and privacy
+
+- [Terms of Service](docs/legal/terms.md)
+- [Privacy Policy](docs/legal/privacy-policy.md)
+
 ## Development
 
 ```bash
