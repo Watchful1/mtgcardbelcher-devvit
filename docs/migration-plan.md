@@ -18,7 +18,7 @@ One app, installed on four subreddits. What each install does depends on which s
   - **Seeding:** the first run reads r/MTGCardBelcher's newest 1,000 posts once and adds every eligible image.
   - **After that,** a 30-minute cron reads r/MTGCardBelcher from newest to oldest and stops at the first post older than 15 days. That window is enough because a post's flair only changes in its first two weeks: after 2 weeks pending, it is rejected. New posts arrive about once a month, so a normal run reads one page.
   - **Each run** adds posts flaired *approved* that pass the image checks, and removes posts in the window that no longer have that flair.
-  - **Trade-off:** an older image that a moderator later reflairs or deletes stays in the pool. A moderator menu action, "Rebuild image pool", would redo the seeding scan when that matters.
+  - **Trade-off:** an older image that a moderator later reflairs stays in the pool, and so does any deleted image, since deleted posts drop out of the listing rather than showing up to be removed. A moderator menu action, "Rebuild image pool", would redo the seeding scan when that matters.
 - **Curation runs only in the r/MTGCardBelcher install**, because changing flairs needs mod powers in that subreddit. It runs on the same cron, over the same 15-day window.
 - **Collector numbers have to be shared across installs**, so they stay in Reddit comments as they are today: read the body, add one, edit the comment. Editing the app's own comment in another subreddit works (spike S2). The existing counter comments belong to u/MTGCardBelcher, so the app can only edit them after Reddit moves the app onto that account (see Cutover). Until then, the counter comment IDs come from a setting that points at test comments.
 - **Cooldowns are a Redis key with a random expiry** (10 min to 2 h), one per collectible per install, so each subreddit has its own cooldown. An art reply sets the key, and while it exists, calls get the waiting reply.
@@ -43,6 +43,8 @@ src/server/
 
 ## Steps
 
+_Status 2026-10-30: steps 1–7 are done. Next is the playtest; see [playtest.md](playtest.md)._
+
 1. **Register the app (Greg).** Create the app on the developer portal under a temporary name, since the account name `mtgcardbelcher` is already taken by the PRAW bot. Then run `npx devvit@latest init <code>` in this repo using the **Mod Tool Simple** template, and delete the nested `.git` it creates.
 2. **Fetch domain and legal docs.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. It's on the global allowlist, so there's no review to wait for. Apps that use fetch also need terms of service and a privacy policy, linked from the app details page on the portal (`docs/legal/`).
 3. **Port the pure logic with tests:** parsing, skip rules, reply builder, data tables, curation rules. Most of the work is here, and none of it needs the platform.
@@ -55,7 +57,7 @@ src/server/
 
 ## Open questions to settle in playtest
 
-- **Upvote ratio.** Approving an image needs ratio ≥ 0.85, but Devvit's `Post` object doesn't expose it. The ratio is in the lower-level data Devvit receives (`upvoteRatio` in `@devvit/protos` listing messages). Find out whether it can be read. If it can't, decide whether approval should use score alone.
+- **Upvote ratio.** Approving an image needs ratio ≥ 0.85, but Devvit's `Post` object doesn't expose it. The ratio is in the lower-level data Devvit receives (`upvoteRatio` in `@devvit/protos` listing messages). Find out whether it can be read. If it can't, decide whether approval should use score alone. **For now the code approves on score alone** (`popular` in `src/server/curation.ts`).
 - **User-Agent.** Does Devvit's `fetch` send our `User-Agent` header, or replace it? Scryfall may block requests without a proper one.
 - **Seeding time.** Can the one-off 1,000-post seeding scan (10 pages) finish within the 30-second limit? If not, split it across chained scheduler runs. Normal runs read one page, so they are not at risk.
 - **Escaped brackets.** Does the comment body in a trigger contain `\[\[`, as the API gives PRAW? Test with a call typed in new Reddit's rich-text editor.

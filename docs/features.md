@@ -31,7 +31,7 @@ Above the lines is a header, and below them the footer `Submit your content at: 
 
 Checked in this order:
 
-1. **Collectibles: Colossal Dreadmaw, Storm Crow, Negate** (Negate also matches six "æ" misspellings). Each one has a cooldown: after an art reply, that card's art can't be won again for a random 10 minutes to 2 hours. The cooldown starts open, so the first call after the bot starts gets the art.
+1. **Collectibles: Colossal Dreadmaw, Storm Crow, Negate** (Negate also matches six spellings with "ae" or "æ", such as "nægate"). Each one has a cooldown: after an art reply, that card's art can't be won again for a random 10 minutes to 2 hours. The cooldown starts open, so the first call after the bot starts gets the art.
    - **When the cooldown has run out**, the whole reply is that card's ASCII art (Negate's is the Desolatormagic copypasta), stamped with a 4-digit collector number: "You are No. 0042 to…". The running count is stored as the body of a Reddit comment the bot edits (`me0tbmp`, `mlnqxci`, `nn1eyru`).
    - **While the cooldown is running**, the bot sends a "waiting" reply instead, with a fixed header, one teaser image and a fixed flavour text. No other card in the call gets a line.
 2. **Revel in Riches** links to the Negate image instead of a random one.
@@ -55,7 +55,9 @@ The pool is every post with the **approved** flair whose URL is on `i.redd.it` o
 - **Capitalised collectible names get the waiting reply too.** The PRAW bot compares the text as typed against lowercase spellings (`text_functions.py:988`), so `[[Colossal Dreadmaw]]` during the cooldown gets a normal reply while `[[colossal dreadmaw]]` gets the waiting one. The port lowercases first, as the art check already does.
 - **Each subreddit has its own cooldown.** The PRAW bot shares one cooldown across all three subreddits because one process serves them all. The collector numbers stay shared.
 - **The image pool is kept, not rebuilt.** The PRAW bot rebuilds the pool from the newest 1,000 posts every 30 minutes. The port stores the pool in Redis and only reads recent posts (see the plan).
-- **Scryfall layouts the bot doesn't recognise** get no Scryfall link. A simpler rule ("use `card_faces` images if they exist, otherwise `image_uris`") covers every layout and would drop that list.
+- **Scryfall finds more cards.** The PRAW bot gives no link for card layouts missing from its list, and its lookup misses names containing `&` or `//`. The port uses one rule for images ("`card_faces` images if there are two, otherwise `image_uris`"), looks names up with Scryfall's collection endpoint, and looks split cards up by their first face. Flavour text that sits only on a card's faces is used too.
+- **No flavour line when Scryfall is down.** The PRAW bot's "Sometimes, rarely, Scryfall is not there…" line is left out.
+- **A collectible with no counter comment set up gets the waiting reply.** The collector number lives in a Reddit comment named by a setting; until it is set, the art can't be numbered, so calls get the waiting reply instead.
 
 ## Not ported (PRAW plumbing)
 

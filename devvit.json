@@ -6,7 +6,47 @@
     "entry": "index.cjs"
   },
   "triggers": {
-    "onAppInstall": "/internal/triggers/on-app-install"
+    "onAppInstall": "/internal/triggers/on-app-install",
+    "onCommentCreate": "/internal/triggers/on-comment-create",
+    "onPostCreate": "/internal/triggers/on-post-create"
+  },
+  "scheduler": {
+    "tasks": {
+      "pool-tick": {
+        "endpoint": "/internal/scheduler/pool-tick",
+        "cron": "*/30 * * * *"
+      },
+      "pool-tick-continue": {
+        "endpoint": "/internal/scheduler/pool-tick"
+      }
+    }
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Rebuild MTGCardBelcher image pool",
+        "description": "Re-read the newest 1,000 r/MTGCardBelcher posts, dropping images that were reflaired or deleted.",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/rebuild-pool"
+      }
+    ]
+  },
+  "settings": {
+    "global": {
+      "dreadmawCounterCommentId": {
+        "type": "string",
+        "label": "Id of the comment holding Colossal Dreadmaw's collector number (leave unset to disable the art)"
+      },
+      "stormCrowCounterCommentId": {
+        "type": "string",
+        "label": "Id of the comment holding Storm Crow's collector number (leave unset to disable the art)"
+      },
+      "negateCounterCommentId": {
+        "type": "string",
+        "label": "Id of the comment holding Negate's collector number (leave unset to disable the art)"
+      }
+    }
   },
   "scripts": {
     "build": "vite build",
@@ -17,12 +57,7 @@
     "redis": true,
     "http": {
       "enable": true,
-      "domains": [
-        "api.scryfall.com"
-      ]
+      "domains": ["api.scryfall.com"]
     }
-  },
-  "dev": {
-    "subreddit": "mtgcardbelcher_de_dev"
   }
 }
