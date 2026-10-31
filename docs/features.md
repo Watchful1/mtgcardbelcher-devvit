@@ -31,7 +31,7 @@ Above the lines is a header, and below them the footer `Submit your content at: 
 
 Checked in this order:
 
-1. **Collectibles: Colossal Dreadmaw, Storm Crow, Negate** (Negate also matches six "æ" misspellings). Each one has a cooldown, a random 10 minutes to 2 hours that restarts after every art reply.
+1. **Collectibles: Colossal Dreadmaw, Storm Crow, Negate** (Negate also matches six "æ" misspellings). Each one has a cooldown: after an art reply, that card's art can't be won again for a random 10 minutes to 2 hours. The cooldown starts open, so the first call after the bot starts gets the art.
    - **When the cooldown has run out**, the whole reply is that card's ASCII art (Negate's is the Desolatormagic copypasta), stamped with a 4-digit collector number: "You are No. 0042 to…". The running count is stored as the body of a Reddit comment the bot edits (`me0tbmp`, `mlnqxci`, `nn1eyru`).
    - **While the cooldown is running**, the bot sends a "waiting" reply instead, with a fixed header, one teaser image and a fixed flavour text. No other card in the call gets a line.
 2. **Revel in Riches** links to the Negate image instead of a random one.
@@ -50,10 +50,11 @@ Every 30 minutes the bot reads the newest 1,000 posts in r/MTGCardBelcher and mo
 
 The pool is every post with the **approved** flair whose URL is on `i.redd.it` or `i.imgur.com` and is not a self-post, plus one image that is always in it (Jollyver, a tribute to u/MTGLardFetcher). The five flair template IDs are in `configs.py:IMGSubmissionParams`.
 
-## 5. Existing quirks: keep or fix?
+## 5. Deliberate changes from the PRAW bot
 
-- **Capitalised collectible names skip the waiting reply.** The waiting check compares the text as typed against lowercase spellings (`text_functions.py:988`), so `[[Colossal Dreadmaw]]` during the cooldown gets a normal reply, while `[[colossal dreadmaw]]` gets the waiting one. The art check does lowercase the text, so it is unaffected. **Recommend fixing.**
-- **The cooldown is shared by all subreddits**, because one process serves all three. On Devvit each subreddit has its own install, so each subreddit would naturally get its own cooldown unless the cooldown is stored somewhere shared.
+- **Capitalised collectible names get the waiting reply too.** The PRAW bot compares the text as typed against lowercase spellings (`text_functions.py:988`), so `[[Colossal Dreadmaw]]` during the cooldown gets a normal reply while `[[colossal dreadmaw]]` gets the waiting one. The port lowercases first, as the art check already does.
+- **Each subreddit has its own cooldown.** The PRAW bot shares one cooldown across all three subreddits because one process serves them all. The collector numbers stay shared.
+- **The image pool is kept, not rebuilt.** The PRAW bot rebuilds the pool from the newest 1,000 posts every 30 minutes. The port stores the pool in Redis and only reads recent posts (see the plan).
 - **Scryfall layouts the bot doesn't recognise** get no Scryfall link. A simpler rule ("use `card_faces` images if they exist, otherwise `image_uris`") covers every layout and would drop that list.
 
 ## Not ported (PRAW plumbing)
