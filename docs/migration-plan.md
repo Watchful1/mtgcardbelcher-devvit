@@ -43,7 +43,7 @@ src/server/
 
 ## Steps
 
-_Status 2026-10-30: steps 1–7 are done. Next is the playtest; see [playtest.md](playtest.md)._
+_Status 2026-10-30: steps 1–7 are done. Next is the playtest; see the [playtest runbook](runbooks/playtest.md)._
 
 1. **Register the app (Greg).** Create the app on the developer portal under a temporary name, since the account name `mtgcardbelcher` is already taken by the PRAW bot. Then run `npx devvit@latest init <code>` in this repo using the **Mod Tool Simple** template, and delete the nested `.git` it creates.
 2. **Fetch domain and legal docs.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. It's on the global allowlist, so there's no review to wait for. Apps that use fetch also need terms of service and a privacy policy, linked from the app details page on the portal (`docs/legal/`).

@@ -29,6 +29,13 @@
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/rebuild-pool"
+      },
+      {
+        "label": "Create MTGCardBelcher collector counters",
+        "description": "Post a counter comment for each collectible under this post, and log their ids for the counter settings.",
+        "location": "post",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/create-counters"
       }
     ]
   },

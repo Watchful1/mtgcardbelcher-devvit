@@ -2,8 +2,8 @@
 
 import { context, reddit, redis, settings } from '@devvit/web/server';
 
-import { COUNTER_SETTINGS } from './counter-settings';
-import type { Collectible } from './data/collectibles';
+import { COUNTER_SETTINGS, PRAW_COUNTER_COMMENTS } from './counter-settings';
+import { COLLECTIBLES, type Collectible } from './data/collectibles';
 import type { RespondPorts } from './respond';
 import { lookupCards, randomFlavour } from './scryfall';
 import { Store, type RedisPort } from './store';
@@ -40,6 +40,24 @@ async function nextCollectorNumber(collectible: Collectible): Promise<number | u
   } catch (error) {
     console.error(`${collectible.name} counter comment ${commentId} failed: ${String(error)}`);
     return undefined;
+  }
+}
+
+/**
+ * Posts a counter comment per collectible under `postId`, each starting at the
+ * PRAW bot's current number (0 if that can't be read), and logs their ids.
+ */
+export async function createCounterComments(postId: string): Promise<void> {
+  for (const collectible of COLLECTIBLES) {
+    let start = 0;
+    try {
+      const body = (await reddit.getCommentById(PRAW_COUNTER_COMMENTS[collectible.id] as `t1_${string}`)).body;
+      start = Number.parseInt(body.trim(), 10) || 0;
+    } catch (error) {
+      console.error(`Reading the PRAW ${collectible.name} counter failed, starting at 0: ${String(error)}`);
+    }
+    const comment = await reddit.submitComment({ id: postId as `t3_${string}`, text: String(start) });
+    console.log(`Counter comment for ${collectible.name}: ${comment.id} (starts at ${start}). Set it with: npx devvit settings set ${COUNTER_SETTINGS[collectible.id]}`);
   }
 }
 
