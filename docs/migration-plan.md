@@ -22,10 +22,7 @@ One app, installed on four subreddits. What each install does depends on which s
 - **Curation runs only in the r/MTGCardBelcher install**, because changing flairs needs mod powers in that subreddit. It runs on the same cron, over the same 15-day window.
 - **Collector numbers have to be shared across installs**, so they stay in Reddit comments as they are today: read the body, add one, edit the comment. Editing the app's own comment in another subreddit works (spike S2). The existing counter comments belong to u/MTGCardBelcher, so the app can only edit them after Reddit moves the app onto that account (see Cutover). Until then, the counter comment IDs come from a setting that points at test comments.
 - **Cooldowns are a Redis key with a random expiry** (10 min to 2 h), one per collectible per install, so each subreddit has its own cooldown. An art reply sets the key, and while it exists, calls get the waiting reply.
-- **Scryfall is optional.** Its domain, `api.scryfall.com`, may not be approved, so nothing waits on the review and the app works without it:
-  - **With approval,** each reply makes up to two requests: one `POST /cards/collection` for every name in the call (up to 75 per request) instead of one request per name, and one `GET /cards/random?q=has:flavor` when there is a single call. Both are bounded by a timeout, and a failure only drops the Scryfall parts of the reply, as it does today.
-  - **Without approval,** replies have no `[SF]` links and no flavour line. The PRAW bot's "Scryfall is not there" fallback line is left out too, since it would appear on every single-card reply.
-  - **If the domain is refused,** remove it from `devvit.json`, turn the Scryfall client off with a constant, and drop the terms of service and privacy policy if nothing else uses fetch.
+- **Scryfall needs no review.** `api.scryfall.com` is on Reddit's global fetch allowlist, so listing it in `devvit.json` is enough. Each reply makes up to two requests: one `POST /cards/collection` for every name in the call (up to 75 per request) instead of one request per name, and one `GET /cards/random?q=has:flavor` when there is a single call. Both are bounded by a timeout, and a failure only drops the Scryfall parts of the reply: no `[SF]` links, and no flavour line. The PRAW bot's "Scryfall is not there" fallback line is left out.
 
 ## Code layout
 
@@ -47,7 +44,7 @@ src/server/
 ## Steps
 
 1. **Register the app (Greg).** Create the app on the developer portal under a temporary name, since the account name `mtgcardbelcher` is already taken by the PRAW bot. Then run `npx devvit@latest init <code>` in this repo using the **Mod Tool Simple** template, and delete the nested `.git` it creates.
-2. **Submit the fetch domain early, then don't wait for it.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. Apps that use fetch also need terms of service and a privacy policy: adapt the ones in `devvit-apps/docs/legal/`. Then `npx devvit upload`, which starts Reddit's review of the domain (1–2 business days). Steps 3–7 go ahead either way.
+2. **Fetch domain and legal docs.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. It's on the global allowlist, so there's no review to wait for. Apps that use fetch also need terms of service and a privacy policy, linked from the app details page on the portal (`docs/legal/`).
 3. **Port the pure logic with tests:** parsing, skip rules, reply builder, data tables, curation rules. Most of the work is here, and none of it needs the platform.
 4. **Scryfall client.** Include the `User-Agent` and `Accept` headers Scryfall asks for.
 5. **Triggers → reply.** Include the 10-minute age guard, the dedup key, and skipping the app's own account (looked up at runtime, not hard-coded) plus u/MTGCardBelcher and u/MTGCardFetcher.
@@ -77,4 +74,4 @@ src/server/
 - **Cooldowns are per subreddit.**
 - **Logging is `devvit logs` only.** There is no telemetry package.
 - **The image pool is kept in Redis** and updated from recent posts, not rebuilt from 1,000 posts each run.
-- **Scryfall is attempted but optional.**
+- **Scryfall is used as planned.** Its domain is on Reddit's global allowlist, so it needs no review.

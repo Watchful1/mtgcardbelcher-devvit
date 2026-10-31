@@ -1,9 +1,6 @@
 // Scryfall: real card images for calls, and a random flavour text. Optional:
 // every failure returns "nothing", and the reply is built without it.
 
-// Off if Reddit refuses the api.scryfall.com fetch domain.
-export const SCRYFALL_ENABLED = true;
-
 const API = 'https://api.scryfall.com';
 const TIMEOUT_MS = 5000;
 // Scryfall asks every client to send these.
@@ -38,7 +35,7 @@ export function cardImages(card: Card): string[] {
 export async function lookupCards(calls: string[], fetchFn: Fetch = fetch): Promise<Map<string, string[]>> {
   const found = new Map<string, string[]>();
   const names = [...new Set(calls.map((call) => call.toLowerCase()))];
-  if (!SCRYFALL_ENABLED || names.length === 0) return found;
+  if (names.length === 0) return found;
 
   const response = await request<{ data: Card[]; not_found: { name: string }[] }>(fetchFn, `${API}/cards/collection`, {
     method: 'POST',
@@ -69,7 +66,6 @@ function identifierName(name: string): string {
 
 /** A random card's flavour text, or undefined. */
 export async function randomFlavour(fetchFn: Fetch = fetch): Promise<string | undefined> {
-  if (!SCRYFALL_ENABLED) return undefined;
   const card = await request<Card>(fetchFn, `${API}/cards/random?q=has%3Aflavor`, { headers: HEADERS });
   return card?.flavor_text ?? card?.card_faces?.find((face) => face.flavor_text)?.flavor_text;
 }
