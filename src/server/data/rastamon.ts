@@ -1,0 +1,45 @@
+// u/Rastamonliveup's r/custommagic cards. Calls matching a spelling (lowercased)
+// get the card's own image instead of a random one.
+
+export interface RastamonCard {
+  name: string;
+  spellings: string[];
+  image: string;
+}
+
+export const KUKA_BEYO = 'Kuka Beyo';
+export const SEBI_GYANDU = 'Sebi Gyandu';
+// Galatians 4:16 calls link to Sebi Gyandu, shown in italics under this name.
+export const GALATIANS = 'Tell the children the truth';
+
+export const RASTAMON_CARDS: RastamonCard[] = [
+  { name: 'Simbaba', spellings: ['simbaba'], image: 'https://i.redd.it/3acfd9iryqjd1.png' },
+  { name: 'Japudi', spellings: ['japudi'], image: 'https://i.redd.it/ln92vcaxjnfa1.jpg' },
+  { name: KUKA_BEYO, spellings: ['kuka beyo'], image: 'https://i.redd.it/7tg9y2u7mvfa1.jpg' },
+  { name: 'Tōbō Dibi', spellings: ['tobo dibi', 'tōbō dibi'], image: 'https://i.redd.it/his9093feaga1.jpg' },
+  { name: 'Bôsgwan', spellings: ['bosgwan', 'bôsgwan'], image: 'https://i.redd.it/b8ti2tcf9wga1.jpg' },
+  { name: 'Mwabdi', spellings: ['mwabdi'], image: 'https://i.redd.it/v7tpor93xuha1.jpg' },
+  { name: 'Kadÿoba', spellings: ['kadyoba', 'kadÿoba'], image: 'https://i.redd.it/on1zb0bu42ja1.jpg' },
+  {
+    name: 'Komdegé Swígu',
+    spellings: ['komdege swigu', 'komdegé swigu', 'komdege swígu', 'komdegé swígu'],
+    image: 'https://i.redd.it/kte28a4yk8ka1.jpg',
+  },
+  {
+    name: 'Dodonbè Dugdjita',
+    spellings: ['dodonbe dugdjita', 'dodonbè dugdjita'],
+    image: 'https://i.redd.it/p5ywsh4yk8ka1.jpg',
+  },
+  { name: 'Sembizi Wamdeyo', spellings: ['sembizi wamdeyo'], image: 'https://i.redd.it/q3ybd1udokra1.jpg' },
+  { name: SEBI_GYANDU, spellings: ['sebi gyandu'], image: 'https://i.redd.it/uvqqezzgp4dd1.jpeg' },
+  {
+    name: GALATIANS,
+    spellings: ['gal 4:16', 'gal. 4:16', 'galatians 4:16', '4:16'],
+    image: 'https://i.redd.it/uvqqezzgp4dd1.jpeg',
+  },
+];
+
+export function findRastamonCard(call: string): RastamonCard | undefined {
+  const lower = call.toLowerCase();
+  return RASTAMON_CARDS.find((card) => card.spellings.includes(lower));
+}

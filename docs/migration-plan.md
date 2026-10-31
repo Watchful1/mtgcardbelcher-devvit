@@ -62,7 +62,7 @@ src/server/
 - **User-Agent.** Does Devvit's `fetch` send our `User-Agent` header, or replace it? Scryfall may block requests without a proper one.
 - **Seeding time.** Can the one-off 1,000-post seeding scan (10 pages) finish within the 30-second limit? If not, split it across chained scheduler runs. Normal runs read one page, so they are not at risk.
 - **Escaped brackets.** Does the comment body in a trigger contain `\[\[`, as the API gives PRAW? Test with a call typed in new Reddit's rich-text editor.
-- **Collection lookup.** Does `/cards/collection` match names the way `/cards/named?exact=` does (ignoring case, handling `//` split names)?
+- ~~**Collection lookup.**~~ Settled 2026-10-30 against the live API. `/cards/collection` ignores case, returns found cards in request order, and finds double-faced cards by their front face. It doesn't find split cards by their full name ("Fire // Ice"), only by their first face ("Fire"), so the client sends the part before `//`.
 
 ## Cutover
 
