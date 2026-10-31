@@ -1,19 +1,39 @@
 {
   "private": true,
-  "name": "mtgcardbelcher",
+  "name": "mtgcardbelcher-dev",
   "version": "0.0.0",
+  "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
+    "build": "vite build",
+    "dev": "devvit playtest",
+    "launch": "npm run verify && devvit publish",
+    "lint": "eslint src",
+    "login": "devvit login",
+    "prettier": "prettier --write .",
     "test": "node --import tsx --test \"src/**/*.test.ts\"",
-    "type-check": "tsc --noEmit",
-    "verify": "npm run type-check && npm test"
+    "type-check": "tsc --build",
+    "verify": "npm run type-check && npm run lint && npm test && npm run build"
   },
   "engines": {
-    "node": ">=22.2.0"
+    "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "@devvit/start": "0.15.1",
+    "@devvit/web": "0.15.1",
+    "@hono/node-server": "^2.0.3",
+    "devvit": "0.15.1",
+    "hono": "4.13.13"
   },
   "devDependencies": {
-    "@types/node": "^22.19.19",
+    "@eslint/js": "10.0.1",
+    "@types/node": "^24.13.3",
+    "eslint": "10.12.0",
+    "globals": "17.13.0",
+    "prettier": "3.9.9",
     "tsx": "4.20.6",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vite": "8.3.3"
   }
 }
