@@ -5,6 +5,7 @@ import { context, reddit, redis, settings } from '@devvit/web/server';
 import { COUNTER_SETTINGS, PRAW_COUNTER_COMMENTS } from './counter-settings';
 import { COLLECTIBLES, type Collectible } from './data/collectibles';
 import type { RespondPorts } from './respond';
+import { withRateLimitRetry } from './rate-limit';
 import { lookupCards, randomFlavour } from './scryfall';
 import { Store, type RedisPort } from './store';
 
@@ -56,7 +57,9 @@ export async function createCounterComments(postId: string): Promise<void> {
     } catch (error) {
       console.error(`Reading the PRAW ${collectible.name} counter failed, starting at 0: ${String(error)}`);
     }
-    const comment = await reddit.submitComment({ id: postId as `t3_${string}`, text: String(start) });
+    const comment = await withRateLimitRetry(() =>
+      reddit.submitComment({ id: postId as `t3_${string}`, text: String(start) }),
+    );
     console.log(`Counter comment for ${collectible.name}: ${comment.id} (starts at ${start}). Set it with: npx devvit settings set ${COUNTER_SETTINGS[collectible.id]}`);
   }
 }
@@ -69,7 +72,7 @@ export async function respondPorts(): Promise<RespondPorts> {
     randomFlavour: () => randomFlavour(),
     nextCollectorNumber,
     reply: async (parentId, text) => {
-      await reddit.submitComment({ id: parentId as `t1_${string}` | `t3_${string}`, text });
+      await withRateLimitRetry(() => reddit.submitComment({ id: parentId as `t1_${string}` | `t3_${string}`, text }));
     },
     rng: Math.random,
     now: Date.now,

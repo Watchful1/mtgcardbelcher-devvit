@@ -106,7 +106,9 @@ Nothing here touches any subreddit except r/mtgcardbelcher_de_dev. The test post
   - Three new comments from u/mtgcardbelcher-dev on the post. Each one is only a number.
   - Three log lines, one of them `Counter comment for Colossal Dreadmaw: t1_… (starts at N). Set it with: npx devvit settings set dreadmawCounterCommentId`.
   - If a log line `Reading the PRAW … counter failed, starting at 0` appears, that counter starts at 0. Go on.
-  - If the toast says "Creating the counter comments failed. See the log.", use P3.
+  - If the toast says "Creating the counter comments failed. See the log.", look at the log. If the `Colossal Dreadmaw` line is there, go on: the next steps need only that counter. Otherwise, use P3.
+
+  **Done 2026-11-08:** only the Dreadmaw counter was created (`t1_19sckig6d0qsj`, starting at 143) before Reddit refused the next comment with `RESOURCE_EXHAUSTED: RatelimitError(TimeString="5 seconds")`. The app now waits as long as Reddit asks, up to 10 seconds, and tries once more, for counter comments and for replies.
   - If you ran this step twice by mistake, use the newest `Colossal Dreadmaw` line in the next steps. The older comments are not used.
 
 - [ ] **8. Start the setting command for the Dreadmaw counter.** It waits for the counter comment's id. Leave it waiting.
