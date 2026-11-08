@@ -43,7 +43,7 @@ src/server/
 
 ## Steps
 
-_Status 2026-10-30: steps 1–7 are done. Next is the playtest; see the [playtest runbook](runbooks/playtest.md)._
+_Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) passed on r/mtgcardbelcher_de_dev. Curation is untested, since it runs only on r/MTGCardBelcher. Next is the cutover._
 
 1. **Register the app (Greg).** Create the app on the developer portal under a temporary name, since the account name `mtgcardbelcher` is already taken by the PRAW bot. Then run `npx devvit@latest init <code>` in this repo using the **Mod Tool Simple** template, and delete the nested `.git` it creates.
 2. **Fetch domain and legal docs.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. It's on the global allowlist, so there's no review to wait for. Apps that use fetch also need terms of service and a privacy policy, linked from the app details page on the portal (`docs/legal/`).
@@ -58,9 +58,11 @@ _Status 2026-10-30: steps 1–7 are done. Next is the playtest; see the [playtes
 ## Open questions to settle in playtest
 
 - **Upvote ratio.** Approving an image needs ratio ≥ 0.85, but Devvit's `Post` object doesn't expose it. The ratio is in the lower-level data Devvit receives (`upvoteRatio` in `@devvit/protos` listing messages). Find out whether it can be read. If it can't, decide whether approval should use score alone. **For now the code approves on score alone** (`popular` in `src/server/curation.ts`).
-- **User-Agent.** Does Devvit's `fetch` send our `User-Agent` header, or replace it? Scryfall may block requests without a proper one.
-- **Seeding time.** Can the one-off 1,000-post seeding scan (10 pages) finish within the 30-second limit? If not, split it across chained scheduler runs. Normal runs read one page, so they are not at risk.
-- **Escaped brackets.** Does the comment body in a trigger contain `\[\[`, as the API gives PRAW? Test with a call typed in new Reddit's rich-text editor.
+- ~~**User-Agent.**~~ Settled in the 2026-11-08 playtest: Scryfall accepted every request, with no `Scryfall … returned` or `failed` line in the log.
+- ~~**Seeding time.**~~ Settled in the 2026-11-08 playtest: r/MTGCardBelcher has about 800 posts, and seeding read all 8 pages in one run.
+- ~~**Escaped brackets.**~~ Settled in the 2026-11-08 playtest: a call typed in new Reddit's rich-text editor was answered.
+- ~~**Trigger timestamps.**~~ Settled in the 2026-11-08 playtest: no fresh comment was skipped as `too-old`.
+- **Rate limits.** Found in the 2026-11-08 playtest: Reddit refused the app's second comment within seconds (`RESOURCE_EXHAUSTED: RatelimitError(TimeString="5 seconds")`). Replies and counter comments now wait and retry once. A new app account in a subreddit where it has no karma is limited hardest, so watch for it on the busy subreddits.
 - ~~**Collection lookup.**~~ Settled 2026-10-30 against the live API. `/cards/collection` ignores case, returns found cards in request order, and finds double-faced cards by their front face. It doesn't find split cards by their full name ("Fire // Ice"), only by their first face ("Fire"), so the client sends the part before `//`.
 
 ## Cutover

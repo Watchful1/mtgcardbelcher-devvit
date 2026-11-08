@@ -189,6 +189,8 @@ Nothing here touches any subreddit except r/mtgcardbelcher_de_dev. The test post
   - the answers to the open questions: Scryfall's User-Agent, escaped brackets, and trigger timestamps;
   - the commit with the recorded results.
 
+  **Done 2026-11-08:** every step matched its Expect except the two noted at steps 1 and 7. Tested commit `74e3b79`, reloaded to `11290d7` after step 7. The log had no error line besides step 7's rate limit. Scryfall accepted every request, the rich-text call was answered, and no comment was skipped as too old. The log had no `App installed` line: the app was probably already installed on the subreddit from an earlier upload.
+
 ## If something goes wrong
 
 P1 and P2 apply after any step. P3 applies when a step says "use P3".
