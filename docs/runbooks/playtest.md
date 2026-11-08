@@ -1,6 +1,6 @@
 # Belcher Playtest
 
-The first live test of the MTGCardBelcher Devvit app (`mtgcardbelcher-dev`) on r/MTGCardBelcher_dev. You start a playtest, post comments with card calls, and check each reply and log line. At the end, Claude collects the logs and records the results.
+The first live test of the MTGCardBelcher Devvit app (`mtgcardbelcher-dev`) on r/mtgcardbelcher_de_dev. You start a playtest, post comments with card calls, and check each reply and log line. At the end, Claude collects the logs and records the results.
 
 Run it from: https://claude.ai/artifact/Qb2qmgR3HUGhFVwRbWftpn
 
@@ -8,36 +8,36 @@ Where:
 
 - **Playtest terminal**: a PowerShell 7 window that runs the playtest. The app's log lines appear here.
 - **Second terminal**: another PowerShell 7 window, for one settings command.
-- **Reddit**: r/MTGCardBelcher_dev in your browser, signed in as yourself, a moderator there.
+- **Reddit**: r/mtgcardbelcher_de_dev in your browser, signed in as yourself, a moderator there.
 - **Claude**: this Claude session.
 
 As you go, keep a list of the steps whose result differs from their Expect, and what you saw. You give it to Claude in the last step.
 
-The PRAW bot u/MTGCardBelcher may also reply on r/MTGCardBelcher_dev. Ignore its replies: every Expect below is about replies from **u/mtgcardbelcher-dev**.
-
-Nothing here touches any subreddit except r/MTGCardBelcher_dev. The test posts and counter comments stay there until you remove them. P2 uninstalls the app, which deletes its data on r/MTGCardBelcher_dev.
+Nothing here touches any subreddit except r/mtgcardbelcher_de_dev. The test posts and counter comments stay there until you remove them. P2 uninstalls the app, which deletes its data on r/mtgcardbelcher_de_dev.
 
 ---
 
 ## Part 1 — start
 
-- [ ] **1. Start the playtest, and record the commit it tests.** The playtest builds the app, installs it on r/MTGCardBelcher_dev and streams its log. Leave this window open until step 15.
+- [ ] **1. Start the playtest, and record the commit it tests.** The playtest builds the app, installs it on r/mtgcardbelcher_de_dev and streams its log. Leave this window open until step 15.
   **Where:** Playtest terminal.
   ```powershell
-  cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && git log -1 --oneline | Tee-Object -FilePath $HOME\belcher-playtest-commit.txt && npx devvit playtest MTGCardBelcher_dev
+  cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && git log -1 --oneline | Tee-Object -FilePath $HOME\belcher-playtest-commit.txt && npx devvit playtest mtgcardbelcher_de_dev
   ```
   **Expect:** the commit line, then within two minutes these two log lines:
-  - `App installed to subreddit: r/MTGCardBelcher_dev`
+  - `App installed to subreddit: r/mtgcardbelcher_de_dev`
   - `Image pool seeded from N pages`, where N is between 1 and 10.
 
   If the command fails before the log starts, or asks you to log in, run `npx devvit login`, then run this step again. If the log shows `Pool tick failed:`, or nothing after five minutes, note it and go on: step 14 rebuilds the pool.
+
+  **Done 2026-11-08:** the first run targeted r/MTGCardBelcher_dev and failed with "You're not a moderator of r/MTGCardBelcher_dev". The runbook now uses the app's own playtest subreddit, r/mtgcardbelcher_de_dev, which `devvit.json` names as `dev.subreddit`.
 
 ## Part 2 — replies
 
 - [ ] **2. Submit the "Belcher playtest" post, with one call in its body.** Open the page in the first block. Put the second block in the title, and the third block in the body.
   **Where:** Reddit.
   ```text
-  https://www.reddit.com/r/MTGCardBelcher_dev/submit
+  https://www.reddit.com/r/mtgcardbelcher_de_dev/submit
   ```
   ```text
   Belcher playtest
@@ -55,7 +55,7 @@ Nothing here touches any subreddit except r/MTGCardBelcher_dev. The test posts a
   - If "(SF)" or the flavour line is missing, look for a `Scryfall … returned` or `Scryfall … failed` line in the log. Note it and go on.
   - If there is no reply, use P3.
 
-  Stay on this post. Steps 3 to 11 comment on it. If you leave it, it is at the top of `https://www.reddit.com/r/MTGCardBelcher_dev/new/`.
+  Stay on this post. Steps 3 to 11 comment on it. If you leave it, it is at the top of `https://www.reddit.com/r/mtgcardbelcher_de_dev/new/`.
 
 - [ ] **3. Comment a set of calls in Markdown mode.** Switch the comment box to Markdown mode, and comment this.
   **Where:** Reddit.
@@ -143,7 +143,7 @@ Nothing here touches any subreddit except r/MTGCardBelcher_dev. The test posts a
 - [ ] **12. Submit a "Weekly Unjerk Thread" post, which the app must ignore.** Open the page in the first block. Put the second block in the title, and the third block in the body.
   **Where:** Reddit.
   ```text
-  https://www.reddit.com/r/MTGCardBelcher_dev/submit
+  https://www.reddit.com/r/mtgcardbelcher_de_dev/submit
   ```
   ```text
   Weekly Unjerk Thread
@@ -165,7 +165,7 @@ Nothing here touches any subreddit except r/MTGCardBelcher_dev. The test posts a
 - [ ] **14. Rebuild the image pool.** Open the subreddit, open its moderator menu (the shield icon, or the "…" menu), and choose **Rebuild MTGCardBelcher image pool**.
   **Where:** Reddit.
   ```text
-  https://www.reddit.com/r/MTGCardBelcher_dev/
+  https://www.reddit.com/r/mtgcardbelcher_de_dev/
   ```
   **Expect:** the toast "Rebuilding the image pool. It can take up to half an hour to finish." Then, usually within a minute, the log lines `Image pool reset for a rebuild` and `Image pool seeded from N pages`. Wait for the `seeded` line before step 15. If the log shows `Pool tick skipped: another run holds the lock`, or no `seeded` line comes within five minutes, note it and go on.
 
@@ -173,7 +173,7 @@ Nothing here touches any subreddit except r/MTGCardBelcher_dev. The test posts a
 
 - [ ] **15. Stop the playtest.** Press Ctrl+C.
   **Where:** Playtest terminal.
-  **Expect:** the PowerShell prompt returns. The app stays installed on r/MTGCardBelcher_dev, and keeps answering calls there.
+  **Expect:** the PowerShell prompt returns. The app stays installed on r/mtgcardbelcher_de_dev, and keeps answering calls there.
 
 - [ ] **16. Hand the results to Claude.** Claude reads the last three hours of the app's log, and asks you for your list of steps that differed. Claude records the results in this runbook and in the migration plan, then commits them to `main` and pushes.
   **Where:** Claude.
@@ -193,12 +193,12 @@ P1 and P2 apply after any step. P3 applies when a step says "use P3".
 
 - [ ] **P1. Stop the playtest.** Press Ctrl+C.
   **Where:** Playtest terminal.
-  **Expect:** the prompt returns. The app stays installed on r/MTGCardBelcher_dev. To resume, run step 1 again, then go on from the step you stopped at. The "Belcher playtest" post and the counter comments are still usable.
+  **Expect:** the prompt returns. The app stays installed on r/mtgcardbelcher_de_dev. To resume, run step 1 again, then go on from the step you stopped at. The "Belcher playtest" post and the counter comments are still usable.
 
-- [ ] **P2. Uninstall the app from r/MTGCardBelcher_dev.** This deletes the app's data and log there. If a failure still needs explaining, do P3 first. Then do P1.
+- [ ] **P2. Uninstall the app from r/mtgcardbelcher_de_dev.** This deletes the app's data and log there. If a failure still needs explaining, do P3 first. Then do P1.
   **Where:** Playtest terminal.
   ```powershell
-  cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit uninstall MTGCardBelcher_dev
+  cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit uninstall mtgcardbelcher_de_dev
   ```
   **Expect:** a message that the app was uninstalled. The test posts and counter comments stay; remove them as a moderator if you want. To start again, redo from step 1.
 
@@ -213,7 +213,7 @@ P1 and P2 apply after any step. P3 applies when a step says "use P3".
 
 **Step 16 ("Ready"):**
 1. Read `$HOME\belcher-playtest-commit.txt` for the commit that was tested.
-2. In `C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit`, run `npx devvit logs MTGCardBelcher_dev --since 3h` in the background for about 30 seconds, since it streams, then stop it. Keep the output in the scratchpad.
+2. In `C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit`, run `npx devvit logs mtgcardbelcher_de_dev --since 3h` in the background for about 30 seconds, since it streams, then stop it. Keep the output in the scratchpad.
 3. Ask Greg for his list of steps whose result differed, and what he saw.
 4. From the log, report: every line containing `failed`, every `Scryfall … returned` line with its status, the `Image pool seeded` lines, the `Counter comment for` lines, and any `Replying to … failed` line.
 5. Answer the open questions in `docs/migration-plan.md`:
@@ -228,6 +228,6 @@ P1 and P2 apply after any step. P3 applies when a step says "use P3".
 
 **P3 ("Stuck"):**
 1. Ask Greg which step failed and what he saw.
-2. Run `npx devvit logs MTGCardBelcher_dev --since 1h` as in step 16.
+2. Run `npx devvit logs mtgcardbelcher_de_dev --since 1h` as in step 16.
 3. Find the lines around the failure, read the code they point to, and report the cause and a fix. If the fix is a code change, make it and run `npm run verify`. The running playtest picks it up by itself.
 4. Add a `**Done <date>:**` note to the failed step, re-render, and republish.
