@@ -56,6 +56,7 @@ The pool is every post with the **approved** flair whose URL is on `i.redd.it` o
 - **Each subreddit has its own cooldown.** The PRAW bot shares one cooldown across all three subreddits because one process serves them all. The collector numbers stay shared.
 - **The image pool is kept, not rebuilt.** The PRAW bot rebuilds the pool from the newest 1,000 posts every 30 minutes. The port stores the pool in Redis and only reads recent posts (see the plan).
 - **Scryfall finds more cards.** The PRAW bot gives no link for card layouts missing from its list, and its lookup misses names containing `&` or `//`. The port uses one rule for images ("`card_faces` images if there are two, otherwise `image_uris`"), looks names up with Scryfall's collection endpoint, and looks split cards up by their first face. Flavour text that sits only on a card's faces is used too.
+- **Images are approved on score alone.** The PRAW bot also required an upvote ratio of at least 0.85, which Devvit doesn't expose.
 - **No flavour line when Scryfall is down.** The PRAW bot's "Sometimes, rarely, Scryfall is not there…" line is left out.
 - **A collectible with no counter comment set up gets the waiting reply.** The collector number lives in a Reddit comment named by a setting; until it is set, the art can't be numbered, so calls get the waiting reply instead.
 

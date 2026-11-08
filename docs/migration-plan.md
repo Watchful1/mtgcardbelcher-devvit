@@ -57,7 +57,7 @@ _Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) p
 
 ## Open questions to settle in playtest
 
-- **Upvote ratio.** Approving an image needs ratio ≥ 0.85, but Devvit's `Post` object doesn't expose it. The ratio is in the lower-level data Devvit receives (`upvoteRatio` in `@devvit/protos` listing messages). Find out whether it can be read. If it can't, decide whether approval should use score alone. **For now the code approves on score alone** (`popular` in `src/server/curation.ts`).
+- ~~**Upvote ratio.**~~ Decided 2026-11-08: approval uses score ≥ 50 alone. Devvit's `Post` doesn't expose the ratio, and the raw listing data that has it isn't reachable from the app. Moderators can still approve or reject any image by setting its flair by hand. If Devvit ever exposes the ratio, `popular()` in `src/server/curation.ts` already applies the 0.85 check when one is passed in.
 - ~~**User-Agent.**~~ Settled in the 2026-11-08 playtest: Scryfall accepted every request, with no `Scryfall … returned` or `failed` line in the log.
 - ~~**Seeding time.**~~ Settled in the 2026-11-08 playtest: r/MTGCardBelcher has about 800 posts, and seeding read all 8 pages in one run.
 - ~~**Escaped brackets.**~~ Settled in the 2026-11-08 playtest: a call typed in new Reddit's rich-text editor was answered.
@@ -78,4 +78,5 @@ _Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) p
 - **Cooldowns are per subreddit.**
 - **Logging is `devvit logs` only.** There is no telemetry package.
 - **The image pool is kept in Redis** and updated from recent posts, not rebuilt from 1,000 posts each run.
+- **Images are approved on score ≥ 50 alone**, without the upvote ratio.
 - **Scryfall is used as planned.** Its domain is on Reddit's global allowlist, so it needs no review.
