@@ -60,6 +60,10 @@
         "type": "boolean",
         "label": "Curation dry run: log the flair changes curation would make on r/MTGCardBelcher, and make none",
         "defaultValue": true
+      },
+      "sourceSubreddit": {
+        "type": "string",
+        "label": "Testing only: a subreddit to use as the image source in place of r/MTGCardBelcher. Leave unset, or set to MTGCardBelcher, for normal use."
       }
     }
   },

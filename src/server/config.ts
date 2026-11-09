@@ -24,5 +24,9 @@ export const PRAW_COUNTER_COMMENTS: Record<Collectible['id'], string> = {
 // would make and makes none.
 export const CURATION_DRY_RUN_SETTING = 'curationDryRun';
 
+// Global setting naming a test subreddit to use in place of r/MTGCardBelcher.
+// Unset, blank or "MTGCardBelcher" means r/MTGCardBelcher.
+export const SOURCE_SUBREDDIT_SETTING = 'sourceSubreddit';
+
 // Scheduler task with no cron, run straight after a pool run that ran out of time.
 export const CONTINUE_TASK = 'pool-tick-continue';

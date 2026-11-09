@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { FLAIRS, type SourcePost } from './flair-rules';
+import { DEFAULT_SOURCE, MTGCARDBELCHER_FLAIRS as FLAIRS, type SourcePost } from './flair-rules';
 import { JOLLYVER, parsePoolPage } from './image-pool';
 import { onPostChanged, onPostDeleted, refreshPool, runSource, type Page, type SourcePorts } from './source-sync';
 import { Store } from './store';
@@ -35,6 +35,7 @@ function setup(posts: SourcePost[], pageSize: number, options: { dryRun?: boolea
   let pagesLeft = options.pagesBeforeTimeout ?? Infinity;
   const ports: SourcePorts = {
     store,
+    source: DEFAULT_SOURCE,
     fetchPage: async (after): Promise<Page> => {
       fetchedAfter.push(after);
       pagesLeft--;

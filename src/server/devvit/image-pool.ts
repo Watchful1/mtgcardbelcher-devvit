@@ -1,12 +1,12 @@
-// The image pool and curation, wired to Devvit. On r/MTGCardBelcher the app
-// curates flairs and keeps the pool on a wiki page; everywhere else it reads
-// that page.
+// The image pool and curation, wired to Devvit. On the source subreddit
+// (r/MTGCardBelcher) the app curates flairs and keeps the pool on a wiki page;
+// everywhere else it reads that page.
 
 import { context, reddit, scheduler, settings } from '@devvit/web/server';
 import type { WikiPagePermissionLevel } from '@devvit/web/server';
 
 import { CONTINUE_TASK, CURATION_DRY_RUN_SETTING } from '../config';
-import { isSourceSubreddit, SOURCE_SUBREDDIT, type SourcePost } from '../flair-rules';
+import { sameSubreddit, type Source, type SourcePost } from '../flair-rules';
 import { asPostId } from '../ids';
 import { POOL_WIKI_PAGE, type PoolPost } from '../image-pool';
 import {
@@ -20,6 +20,7 @@ import {
 } from '../source-sync';
 import type { Store } from '../store';
 import { appUsername, store } from './platform';
+import { isOnSource, sourceConfig, sourceSubredditName } from './source';
 
 // Leaves room under the 30-second handler limit for the request in flight.
 const RUN_BUDGET_MS = 20_000;
@@ -28,9 +29,9 @@ const RUN_BUDGET_MS = 20_000;
 // read it follows the subreddit's wiki settings.
 const APPROVED_CONTRIBUTORS_ONLY = 1 as WikiPagePermissionLevel;
 
-async function fetchPage(after: string | undefined): Promise<Page> {
+async function fetchPage(subredditName: string, after: string | undefined): Promise<Page> {
   const posts = await reddit
-    .getNewPosts({ subredditName: SOURCE_SUBREDDIT, limit: PAGE_SIZE, pageSize: PAGE_SIZE, ...(after ? { after } : {}) })
+    .getNewPosts({ subredditName, limit: PAGE_SIZE, pageSize: PAGE_SIZE, ...(after ? { after } : {}) })
     .all();
   return {
     posts: posts.map(
@@ -48,16 +49,12 @@ async function fetchPage(after: string | undefined): Promise<Page> {
   };
 }
 
-async function setFlair(postId: string, flairId: string): Promise<void> {
-  await reddit.setPostFlair({ subredditName: SOURCE_SUBREDDIT, postId: asPostId(postId), flairTemplateId: flairId });
-}
-
 /** Writing a page that doesn't exist creates it. Its permissions are set once, after the first write. */
-async function writeWikiPage(db: Store, content: string): Promise<void> {
-  await reddit.updateWikiPage({ subredditName: SOURCE_SUBREDDIT, page: POOL_WIKI_PAGE, content, reason: 'Image pool update' });
+async function writeWikiPage(db: Store, subredditName: string, content: string): Promise<void> {
+  await reddit.updateWikiPage({ subredditName, page: POOL_WIKI_PAGE, content, reason: 'Image pool update' });
   if (await db.pageSettingsApplied()) return;
   await reddit.updateWikiPageSettings({
-    subredditName: SOURCE_SUBREDDIT,
+    subredditName,
     page: POOL_WIKI_PAGE,
     listed: false,
     permLevel: APPROVED_CONTRIBUTORS_ONLY,
@@ -66,27 +63,31 @@ async function writeWikiPage(db: Store, content: string): Promise<void> {
 }
 
 /** The page's text, or undefined if it can't be read. Logs the failure unless the caller expects it. */
-async function readWikiPage(options: { quiet?: boolean } = {}): Promise<string | undefined> {
+async function readWikiPage(subredditName: string, options: { quiet?: boolean } = {}): Promise<string | undefined> {
   try {
-    return (await reddit.getWikiPage(SOURCE_SUBREDDIT, POOL_WIKI_PAGE)).content;
+    return (await reddit.getWikiPage(subredditName, POOL_WIKI_PAGE)).content;
   } catch (error) {
-    if (!options.quiet) console.error(`Reading r/${SOURCE_SUBREDDIT}/wiki/${POOL_WIKI_PAGE} failed: ${String(error)}`);
+    if (!options.quiet) console.error(`Reading r/${subredditName}/wiki/${POOL_WIKI_PAGE} failed: ${String(error)}`);
     return undefined;
   }
 }
 
-async function sourcePorts(): Promise<SourcePorts> {
+async function sourcePorts(source: Source): Promise<SourcePorts> {
   const db = store();
+  const name = source.subredditName;
   const deadline = Date.now() + RUN_BUDGET_MS;
   // Unset counts as on, so curation can't change flairs until someone turns it off.
   const dryRun = (await settings.get<boolean>(CURATION_DRY_RUN_SETTING)) ?? true;
   return {
     store: db,
-    fetchPage,
-    setFlair,
+    source,
+    fetchPage: (after) => fetchPage(name, after),
+    setFlair: async (postId, flairId) => {
+      await reddit.setPostFlair({ subredditName: name, postId: asPostId(postId), flairTemplateId: flairId });
+    },
     // Before the first write the page doesn't exist, so a failed read isn't news here.
-    readWikiPage: () => readWikiPage({ quiet: true }),
-    writeWikiPage: (content) => writeWikiPage(db, content),
+    readWikiPage: () => readWikiPage(name, { quiet: true }),
+    writeWikiPage: (content) => writeWikiPage(db, name, content),
     now: Date.now,
     timeLeft: () => Date.now() < deadline,
     dryRun,
@@ -94,10 +95,20 @@ async function sourcePorts(): Promise<SourcePorts> {
 }
 
 /** Mod actions fail silently without mod rights, so check before relying on them. */
-async function isModeratorOfSource(): Promise<boolean> {
+async function isModeratorOf(subredditName: string): Promise<boolean> {
   const username = await appUsername();
-  const found = await reddit.getModerators({ subredditName: SOURCE_SUBREDDIT, username }).all();
+  const found = await reddit.getModerators({ subredditName, username }).all();
   return found.length > 0;
+}
+
+/** Curates and publishes the pool on the source subreddit. True if seeding needs another run. */
+async function runOnSource(): Promise<boolean> {
+  const source = await sourceConfig();
+  if (!(await isModeratorOf(source.subredditName))) {
+    console.error(`The app is not a moderator of r/${source.subredditName}, so it can't curate or write the image pool`);
+    return false;
+  }
+  return (await runSource(await sourcePorts(source))) === 'seeding';
 }
 
 /**
@@ -113,12 +124,11 @@ export async function poolTick(): Promise<boolean> {
   }
   let needsContinue = false;
   try {
-    if (!isSourceSubreddit(context.subredditName)) {
-      await refreshPool(db, () => readWikiPage());
-    } else if (!(await isModeratorOfSource())) {
-      console.error(`The app is not a moderator of r/${SOURCE_SUBREDDIT}, so it can't curate or write the image pool`);
+    const sourceName = await sourceSubredditName();
+    if (sameSubreddit(context.subredditName, sourceName)) {
+      needsContinue = await runOnSource();
     } else {
-      needsContinue = (await runSource(await sourcePorts())) === 'seeding';
+      await refreshPool(db, () => readWikiPage(sourceName));
     }
   } catch (error) {
     console.error(`Pool run failed: ${String(error)}`);
@@ -130,26 +140,27 @@ export async function poolTick(): Promise<boolean> {
   return true;
 }
 
-/** A post on r/MTGCardBelcher changed flair, or was removed or restored: update the pool. */
+/** A post on the source subreddit changed flair, or was removed or restored: update the pool. */
 export async function postChanged(post: PoolPost): Promise<void> {
-  if (!isSourceSubreddit(context.subredditName)) return;
-  await onPostChanged({ ...post, id: asPostId(post.id) }, await sourcePorts());
+  if (!(await isOnSource(context.subredditName))) return;
+  await onPostChanged({ ...post, id: asPostId(post.id) }, await sourcePorts(await sourceConfig()));
 }
 
-/** A post was deleted on r/MTGCardBelcher: drop it from the pool. */
+/** A post was deleted on the source subreddit: drop it from the pool. */
 export async function postDeleted(postId: string): Promise<void> {
-  if (!isSourceSubreddit(context.subredditName)) return;
-  await onPostDeleted(asPostId(postId), await sourcePorts());
+  if (!(await isOnSource(context.subredditName))) return;
+  await onPostDeleted(asPostId(postId), await sourcePorts(await sourceConfig()));
 }
 
-/** For the rebuild menu item: reseed the pool on r/MTGCardBelcher, or reload it elsewhere. Returns the toast. */
+/** For the rebuild menu item: reseed the pool on the source subreddit, or reload it elsewhere. Returns the toast. */
 export async function rebuildPool(): Promise<string> {
-  if (isSourceSubreddit(context.subredditName)) {
+  const sourceName = await sourceSubredditName();
+  if (sameSubreddit(context.subredditName, sourceName)) {
     await store().requestReset();
     await poolTick();
     return 'Rebuilding the image pool from the newest 1,000 posts. It can take up to half an hour to finish.';
   }
   if (!(await poolTick())) return 'Another image pool update is running. Try again in a minute.';
   const images = (await store().pool()).length - 1;
-  return `The image pool has ${images} images from r/${SOURCE_SUBREDDIT}. The log says if the reload failed.`;
+  return `The image pool has ${images} images from r/${sourceName}. The log says if the reload failed.`;
 }

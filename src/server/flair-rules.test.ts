@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { flairName, FLAIRS, isSourceSubreddit, nextFlair, type SourcePost } from './flair-rules';
+import {
+  flairName,
+  flairsFromTemplates,
+  MTGCARDBELCHER_FLAIRS as FLAIRS,
+  nextFlair as nextFlairFor,
+  sameSubreddit,
+  type SourcePost,
+} from './flair-rules';
+
+const nextFlair = (post: SourcePost, now: number) => nextFlairFor(post, now, FLAIRS);
 
 const NOW = 2_000_000_000_000;
 const DAY = 24 * 60 * 60 * 1000;
@@ -47,12 +56,27 @@ test('an unflaired post is flaired other; settled posts are left alone', () => {
 });
 
 test('flairName names known flairs for log lines', () => {
-  assert.equal(flairName(FLAIRS.approved), 'approved');
-  assert.equal(flairName(undefined), 'no flair');
-  assert.equal(flairName('some-other-id'), 'some-other-id');
+  assert.equal(flairName(FLAIRS.approved, FLAIRS), 'approved');
+  assert.equal(flairName(undefined, FLAIRS), 'no flair');
+  assert.equal(flairName('some-other-id', FLAIRS), 'some-other-id');
 });
 
-test('isSourceSubreddit ignores case', () => {
-  assert.ok(isSourceSubreddit('mtgcardbelcher'));
-  assert.ok(!isSourceSubreddit('magicthecirclejerking'));
+test('sameSubreddit ignores case', () => {
+  assert.ok(sameSubreddit('mtgcardbelcher', 'MTGCardBelcher'));
+  assert.ok(!sameSubreddit('magicthecirclejerking', 'MTGCardBelcher'));
+});
+
+test("a test subreddit's flairs are found by name, in any case", () => {
+  const templates = ['New', 'pending', 'APPROVED', 'Rejected', ' Other '].map((text, i) => ({ id: `id-${i}`, text }));
+  assert.deepEqual(flairsFromTemplates([...templates, { id: 'x', text: 'Discussion' }]), {
+    new: 'id-0',
+    pending: 'id-1',
+    approved: 'id-2',
+    rejected: 'id-3',
+    other: 'id-4',
+  });
+});
+
+test('a test subreddit missing a flair is refused, naming what is missing', () => {
+  assert.throws(() => flairsFromTemplates([{ id: 'a', text: 'Approved' }]), /no post flair named new, pending, rejected, other/);
 });

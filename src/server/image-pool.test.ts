@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { FLAIRS } from './flair-rules';
-import { formatPoolPage, isPoolImage, parsePoolPage, poolChanges } from './image-pool';
+import { DEFAULT_SOURCE, MTGCARDBELCHER_FLAIRS as FLAIRS } from './flair-rules';
+import { formatPoolPage, isPoolImage as isPoolImageIn, parsePoolPage, poolChanges, type PoolPost } from './image-pool';
+
+const isPoolImage = (post: Omit<PoolPost, 'id'>) => isPoolImageIn(post, DEFAULT_SOURCE);
 
 const approved = (url: string) => ({ flairId: FLAIRS.approved, url });
 
@@ -15,10 +17,13 @@ test('pool images are approved direct image links, not self-posts', () => {
 });
 
 test('poolChanges adds pool images and removes everything else it saw', () => {
-  const changes = poolChanges([
-    { id: 't3_in', ...approved('https://i.redd.it/a.png') },
-    { id: 't3_out', flairId: FLAIRS.rejected, url: 'https://i.redd.it/b.png' },
-  ]);
+  const changes = poolChanges(
+    [
+      { id: 't3_in', ...approved('https://i.redd.it/a.png') },
+      { id: 't3_out', flairId: FLAIRS.rejected, url: 'https://i.redd.it/b.png' },
+    ],
+    DEFAULT_SOURCE,
+  );
   assert.deepEqual([...changes.add], [['t3_in', 'https://i.redd.it/a.png']]);
   assert.deepEqual(changes.remove, ['t3_out']);
 });

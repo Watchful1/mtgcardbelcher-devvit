@@ -10,10 +10,10 @@ import type {
   TriggerResponse,
 } from '@devvit/web/shared';
 
-import { isSourceSubreddit } from '../server/flair-rules';
 import { asCommentId, asPostId } from '../server/ids';
 import { poolTick, postChanged, postDeleted } from '../server/devvit/image-pool';
 import { respondPorts } from '../server/devvit/replies';
+import { isOnSource } from '../server/devvit/source';
 import { respond, type CallTarget } from '../server/respond';
 
 export const triggers = new Hono();
@@ -27,8 +27,14 @@ function toMs(timestamp: number): number {
 }
 
 async function answer(target: CallTarget | undefined): Promise<void> {
-  // r/MTGCardBelcher is where images are submitted, not where calls are answered.
-  if (!target || isSourceSubreddit(context.subredditName)) return;
+  if (!target) return;
+  try {
+    // The source subreddit (r/MTGCardBelcher) is where images are submitted, not where calls are answered.
+    if (await isOnSource(context.subredditName)) return;
+  } catch (error) {
+    console.error(`Reading the source subreddit setting failed: ${String(error)}`);
+    return;
+  }
   try {
     await respond(target, await respondPorts());
   } catch (error) {
@@ -66,7 +72,7 @@ triggers.post('/on-post-create', async (c) => {
   return c.json(ok, 200);
 });
 
-// The next three only act on r/MTGCardBelcher, where they keep the image pool current.
+// The next three only act on the source subreddit, where they keep the image pool current.
 triggers.post('/on-post-flair-update', async (c) => {
   const { post } = await c.req.json<OnPostFlairUpdateRequest>();
   if (post) {

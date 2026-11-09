@@ -1,7 +1,8 @@
-// The r/MTGCardBelcher install's scheduled work: seeding the image pool once,
-// curating flairs, and writing the pool to the wiki page the other installs read.
+// The source subreddit's install (r/MTGCardBelcher) does this scheduled work:
+// seeding the image pool once, curating flairs, and writing the pool to the
+// wiki page the other installs read.
 
-import { CURATION_WINDOW_MS, flairName, nextFlair, type SourcePost } from './flair-rules';
+import { CURATION_WINDOW_MS, flairName, nextFlair, type Source, type SourcePost } from './flair-rules';
 import { formatPoolPage, parsePoolPage, poolChanges, type PoolPost } from './image-pool';
 import type { Store } from './store';
 
@@ -20,6 +21,8 @@ export interface Page {
 
 export interface SourcePorts {
   store: Store;
+  /** The subreddit whose posts make the pool, and its flairs. */
+  source: Source;
   fetchPage: (after: string | undefined) => Promise<Page>;
   setFlair: (postId: string, flairId: string) => Promise<void>;
   /** The pool's wiki page as it is now, or undefined if it doesn't exist or can't be read. */
@@ -59,7 +62,7 @@ async function seed(ports: SourcePorts): Promise<boolean> {
   while (ports.timeLeft()) {
     const page = await ports.fetchPage(after);
     // The pool starts empty, so seeding only adds.
-    await store.applySourceChanges({ ...poolChanges(page.posts), remove: [] });
+    await store.applySourceChanges({ ...poolChanges(page.posts, ports.source), remove: [] });
     pages++;
     if (!page.after || pages >= SEED_MAX_PAGES) {
       await store.finishSeeding();
@@ -101,18 +104,18 @@ async function curate(ports: SourcePorts): Promise<void> {
       console.log('Curation stopped to stay inside the time limit; the next run continues');
       break;
     }
-    const flair = nextFlair(post, ports.now());
+    const flair = nextFlair(post, ports.now(), ports.source.flairs);
     if (flair && ports.dryRun) {
-      console.log(`Dry run: would set flair of ${post.id} from ${flairName(post.flairId)} to ${flairName(flair)}`);
+      console.log(`Dry run: would set flair of ${post.id} from ${flairName(post.flairId, ports.source.flairs)} to ${flairName(flair, ports.source.flairs)}`);
     } else if (flair) {
       await ports.setFlair(post.id, flair);
-      console.log(`Set flair of ${post.id} from ${flairName(post.flairId)} to ${flairName(flair)}`);
+      console.log(`Set flair of ${post.id} from ${flairName(post.flairId, ports.source.flairs)} to ${flairName(flair, ports.source.flairs)}`);
     }
     if (flair) changes++;
     settled.push(flair && !ports.dryRun ? { ...post, flairId: flair } : post);
   }
   if (changes > 0) console.log(`Curation ${ports.dryRun ? 'would change' : 'changed'} ${changes} flairs`);
-  await ports.store.applySourceChanges(poolChanges(settled));
+  await ports.store.applySourceChanges(poolChanges(settled, ports.source));
 }
 
 /**
@@ -133,7 +136,7 @@ async function publish(ports: SourcePorts): Promise<void> {
 
 /** Updates the pool for one post whose flair changed, or that a moderator removed or restored. */
 export async function onPostChanged(post: PoolPost, ports: SourcePorts): Promise<void> {
-  await ports.store.applySourceChanges(poolChanges([post]));
+  await ports.store.applySourceChanges(poolChanges([post], ports.source));
   await publish(ports);
 }
 

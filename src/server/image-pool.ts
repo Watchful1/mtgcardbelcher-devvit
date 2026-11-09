@@ -1,8 +1,8 @@
-// The joke image pool: approved r/MTGCardBelcher posts that link straight to an
-// image. The r/MTGCardBelcher install keeps it and publishes it to a wiki page
-// there; every other install reads that page.
+// The joke image pool: approved posts on the source subreddit (r/MTGCardBelcher)
+// that link straight to an image. The source subreddit's install keeps it and
+// publishes it to a wiki page there; every other install reads that page.
 
-import { FLAIRS, SOURCE_SUBREDDIT, type SourcePost } from './flair-rules';
+import type { Source, SourcePost } from './flair-rules';
 
 // Always in the pool, in memory of u/MTGLardFetcher.
 export const JOLLYVER = 'https://i.redd.it/pcmd6d3o1oad1.png';
@@ -18,11 +18,11 @@ export function isImageUrl(url: string): boolean {
 }
 
 /** Approved posts, not removed by a moderator, linking straight to an image. Self-posts link to the subreddit. */
-export function isPoolImage(post: Omit<PoolPost, 'id'>): boolean {
+export function isPoolImage(post: Omit<PoolPost, 'id'>, source: Source): boolean {
   return (
-    post.flairId === FLAIRS.approved &&
+    post.flairId === source.flairs.approved &&
     !post.removed &&
-    !post.url.includes(SOURCE_SUBREDDIT) &&
+    !post.url.toLowerCase().includes(source.subredditName.toLowerCase()) &&
     isImageUrl(post.url)
   );
 }
@@ -34,10 +34,10 @@ export interface PoolChanges {
 }
 
 /** For each post seen: add it if it's a pool image, otherwise remove it. */
-export function poolChanges(posts: PoolPost[]): PoolChanges {
+export function poolChanges(posts: PoolPost[], source: Source): PoolChanges {
   const changes: PoolChanges = { add: new Map(), remove: [] };
   for (const post of posts) {
-    if (isPoolImage(post)) changes.add.set(post.id, post.url);
+    if (isPoolImage(post, source)) changes.add.set(post.id, post.url);
     else changes.remove.push(post.id);
   }
   return changes;
