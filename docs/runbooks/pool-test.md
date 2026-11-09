@@ -5,6 +5,8 @@ Tests the shared image pool end to end, with a test subreddit standing in for r/
 - the playtest on r/mtgcardbelcher_de_dev reads that page from the other subreddit;
 - changing a flair, removing a post and approving it again each update the page.
 
+Run it from: https://claude.ai/artifact/EgpHWhcEhf5HsSc2zXJ6G6
+
 Where:
 
 - **Terminal**: a PowerShell 7 window for one-off commands.
@@ -15,13 +17,13 @@ Where:
 
 As you go, note any step whose result differs from its Expect. You give the list to Claude in the last step.
 
-Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing must not be forgotten: while `sourceSubreddit` names the test subreddit, every install of the app reads its images from there. Step 19 sets it back, and P1 does the same if you stop early.
+Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing must not be forgotten: while `sourceSubreddit` names the test subreddit, every install of the app reads its images from there. Step 19 sets it back, and P1 does the same if you stop early. The app isn't installed on any real subreddit yet, so nothing else is affected meanwhile.
 
 ---
 
 ## Part 1 — the test subreddit
 
-- [ ] **1. Create the subreddit r/belcher_pool_test.** Make it public, so the app can read its wiki from another subreddit.
+- [ ] **1. Create the subreddit r/belcher_pool_test.** Choose **Public**, so the app can read its wiki from another subreddit.
   **Where:** Reddit.
   ```text
   https://www.reddit.com/subreddits/create
@@ -33,9 +35,9 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
   ```text
   https://old.reddit.com/r/belcher_pool_test/about/flair/#link_templates
   ```
-  **Expect:** the five templates are listed under "link flair templates".
+  **Expect:** the five templates are listed under "link flair templates", spelled and capitalised exactly as above.
 
-- [ ] **3. Let everyone read the wiki.** Under "wiki", choose "mod editing", then click **save options** at the bottom.
+- [ ] **3. Let everyone read the wiki.** Under "wiki", choose "mod editing": everyone can read the wiki, and only moderators can edit it. Then click **save options** at the bottom.
   **Where:** Reddit.
   ```text
   https://old.reddit.com/r/belcher_pool_test/about/edit/
@@ -64,10 +66,13 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
 
 ## Part 2 — install the app as the source
 
-- [ ] **6. Point the app at the test subreddit.** The command asks for the setting's value. Type `belcher_pool_test` and press Enter.
+- [ ] **6. Point the app at the test subreddit.** The command asks for the setting's value: type the value in the second block, and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set sourceSubreddit
+  ```
+  ```text
+  belcher_pool_test
   ```
   **Expect:** a message that the setting was saved. If it says you are not logged in, run `npx devvit login`, then this step again.
 
@@ -76,7 +81,7 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && git log -1 --oneline | Tee-Object -FilePath $HOME\belcher-pool-test-commit.txt && npx devvit upload
   ```
-  **Expect:** the commit line, then a line saying which version was uploaded. Note that version. If the upload fails, stop and use P3.
+  **Expect:** the commit line, then a line saying which version was uploaded. Write that version down for step 8. If the upload fails, use P3.
 
 - [ ] **8. Install the app on r/belcher_pool_test.**
   **Where:** Terminal.
@@ -85,7 +90,7 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
   ```
   **Expect:** a message that the app was installed, naming the version from step 7. If it names an older version, stop and use P3.
 
-- [ ] **9. Stream the test subreddit's log.** Leave this window open until step 20.
+- [ ] **9. Stream the test subreddit's log.** Leave this window open until step 21.
   **Where:** Logs terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit logs belcher_pool_test --since 15m
@@ -102,7 +107,9 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
   - `Image pool seeded from 1 pages`
   - `Image pool page written: 1 images`
 
-  If the toast says "The image pool has 0 images from r/MTGCardBelcher", the setting from step 6 hasn't reached the app yet. Wait five minutes, then do this step again. If a line starting `Pool run failed:` appears, stop and use P3.
+  - If the menu item isn't there, use P3.
+  - If the toast says "The image pool has 0 images from r/MTGCardBelcher", or the three lines don't all appear, the setting from step 6 may not have reached the app yet. Wait five minutes, then do this step again. If it happens a second time, use P3.
+  - If a line starting `Pool run failed:` appears, use P3.
 
 - [ ] **11. Check the wiki page.** It holds one image link.
   **Where:** Reddit.
@@ -120,7 +127,7 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
 
 ## Part 3 — another subreddit reads the page
 
-- [ ] **13. Start the playtest on r/mtgcardbelcher_de_dev.** Leave this window open until step 20.
+- [ ] **13. Start the playtest on r/mtgcardbelcher_de_dev.** The playtest only changes the app on r/mtgcardbelcher_de_dev; the install on r/belcher_pool_test keeps running. Leave this window open until step 20.
   **Where:** Playtest terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit playtest mtgcardbelcher_de_dev
@@ -134,7 +141,8 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
   ```
   **Expect:** the toast "The image pool has 1 images from r/belcher_pool_test. The log says if the reload failed.", and the Playtest terminal shows `Image pool loaded: 1 images`.
 
-  If the toast says 0 images and the log shows `Reading r/belcher_pool_test/wiki/mtgcardbelcher/image-pool failed:`, the app can't read another subreddit's wiki. That is the main result of this test: copy the whole line into your notes, then go on to step 19.
+  - If the menu item isn't there, use P3.
+  - If the toast says 0 images and the log shows `Reading r/belcher_pool_test/wiki/mtgcardbelcher/image-pool failed:`, the app can't read another subreddit's wiki. That is the main result of this test, and Claude reads the line from the log in step 23. Skip steps 15 to 18, and go on with step 19.
 
 - [ ] **15. Comment six calls on r/mtgcardbelcher_de_dev.** Use any post there, for example "Belcher playtest" at the top of the subreddit's new posts.
   **Where:** Reddit.
@@ -145,42 +153,58 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
 
 ## Part 4 — the triggers keep the page current
 
-- [ ] **16. Change Pool test B's flair to Approved.** On r/belcher_pool_test, open Pool test B, and set its flair to **Approved**.
+- [ ] **16. Change Pool test B's flair to Approved.** Open Pool test B from the subreddit's new posts, and set its flair to **Approved**.
   **Where:** Reddit.
+  ```text
+  https://www.reddit.com/r/belcher_pool_test/new/
+  ```
   **Expect:** within a minute, the Logs terminal shows `Image pool page written: 2 images`. If nothing appears, note it and go on.
 
-- [ ] **17. Remove Pool test A.** Open Pool test A, and use **Remove** from its moderator menu.
+- [ ] **17. Remove Pool test A.** Open Pool test A from the subreddit's new posts, and use **Remove** from its moderator menu.
   **Where:** Reddit.
-  **Expect:** within a minute, the Logs terminal shows `Image pool page written: 1 images`. If nothing appears, note it and go on.
+  ```text
+  https://www.reddit.com/r/belcher_pool_test/new/
+  ```
+  **Expect:** within a minute, the Logs terminal shows `Image pool page written: 1 images`, or `0 images` if step 16 didn't update the page. If nothing appears, note it and go on.
 
-- [ ] **18. Approve Pool test A again.** Open Pool test A, and use **Approve** from its moderator menu.
+- [ ] **18. Approve Pool test A again.** Open Pool test A from the subreddit's new posts, and use **Approve** from its moderator menu.
   **Where:** Reddit.
-  **Expect:** within a minute, the Logs terminal shows `Image pool page written: 2 images`. Reload the wiki page from step 11: it holds two links. If not, note it and go on.
+  ```text
+  https://www.reddit.com/r/belcher_pool_test/new/
+  ```
+  **Expect:** within a minute, the Logs terminal shows `Image pool page written: 2 images` (`1 images` if step 16 didn't update the page). The wiki page from step 11 then holds the same number of links. If not, note it and go on.
 
 ## Part 5 — clean up
 
-- [ ] **19. Point the app back at r/MTGCardBelcher.** The command asks for the setting's value. Type `MTGCardBelcher` and press Enter.
+- [ ] **19. Point the app back at r/MTGCardBelcher.** The command asks for the setting's value: type the value in the second block, and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set sourceSubreddit
   ```
+  ```text
+  MTGCardBelcher
+  ```
   **Expect:** a message that the setting was saved.
 
-- [ ] **20. Stop the playtest.** Press Ctrl+C. Then press Ctrl+C in the Logs terminal too.
+- [ ] **20. Stop the playtest.** Press Ctrl+C.
   **Where:** Playtest terminal.
-  **Expect:** both windows return to the PowerShell prompt.
+  **Expect:** the PowerShell prompt returns.
 
-- [ ] **21. Uninstall the app from r/belcher_pool_test.** The subreddit and its posts stay, for a later test.
+- [ ] **21. Stop the log stream.** Press Ctrl+C.
+  **Where:** Logs terminal.
+  **Expect:** the PowerShell prompt returns.
+
+- [ ] **22. Uninstall the app from r/belcher_pool_test.** The subreddit and its posts stay, for a later test.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit uninstall belcher_pool_test
   ```
   **Expect:** a message that the app was uninstalled.
 
-- [ ] **22. Hand the results to Claude.** Claude reads both subreddits' logs from the last two hours, and asks you for your list of steps that differed. Claude records the results in this runbook and in docs/operations.md, then commits and pushes them.
+- [ ] **23. Hand the results to Claude.** Claude reads both subreddits' logs from the last two hours, and asks you for your list of steps that differed. Claude records the results in this runbook and in docs/operations.md, then commits and pushes them.
   **Where:** Claude.
   ```text
-  Ready: do step 22 of the Belcher pool test runbook.
+  Ready: do step 23 of the Belcher pool test runbook.
   ```
   **Expect:** Claude reports:
   - the commit that was tested;
@@ -193,12 +217,15 @@ Nothing here is irreversible, and nothing touches r/MTGCardBelcher. One thing mu
 
 P1 applies after step 6, whenever you stop before step 19. P2 applies after step 8. P3 applies when a step says "use P3".
 
-- [ ] **P1. Point the app back at r/MTGCardBelcher.** Do this before you stop for good. The command asks for the setting's value. Type `MTGCardBelcher` and press Enter.
+- [ ] **P1. Point the app back at r/MTGCardBelcher.** Do this before you stop for good. The command asks for the setting's value: type the value in the second block, and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set sourceSubreddit
   ```
-  **Expect:** a message that the setting was saved. To start again later, redo from step 6.
+  ```text
+  MTGCardBelcher
+  ```
+  **Expect:** a message that the setting was saved. Then stop any playtest or log stream still running with Ctrl+C. To start again later, redo from step 6.
 
 - [ ] **P2. Uninstall the app from r/belcher_pool_test.**
   **Where:** Terminal.
@@ -216,7 +243,7 @@ P1 applies after step 6, whenever you stop before step 19. P2 applies after step
 
 ## Claude's side
 
-**Step 22 ("Ready"):**
+**Step 23 ("Ready"):**
 1. Read `$HOME\belcher-pool-test-commit.txt` for the commit that was tested.
 2. In the repo, run `npx devvit logs belcher_pool_test --since 2h` and `npx devvit logs mtgcardbelcher_de_dev --since 2h`, each in the background for about 30 seconds, since they stream, then stop them. Keep the output in the scratchpad.
 3. Ask Greg for his list of steps whose result differed, and what he saw.
@@ -229,6 +256,6 @@ P1 applies after step 6, whenever you stop before step 19. P2 applies after step
 
 **P3 ("Stuck"):**
 1. Ask Greg which step failed and what he saw.
-2. Read the logs as in step 22, for the last hour.
+2. Read the logs as in step 23, for the last hour.
 3. Find the lines around the failure, read the code they point to, and report the cause and a fix. If the fix is a code change, make it, run `npm run verify`, commit and push, and tell Greg to redo step 7 (upload), step 8 (install) and then the failed step. A running playtest picks up the change by itself.
 4. Add a `**Done <date>:**` note to the failed step, re-render, and republish.
