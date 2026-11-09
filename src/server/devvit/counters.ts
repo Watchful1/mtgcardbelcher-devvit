@@ -14,7 +14,10 @@ import { withRateLimitRetry } from '../rate-limit';
  */
 export async function nextCollectorNumber(collectible: Collectible): Promise<number | undefined> {
   const setting = (await settings.get<string>(COUNTER_SETTINGS[collectible.id]))?.trim();
-  if (!setting) return undefined;
+  if (!setting) {
+    console.log(`${collectible.name} art is off: ${COUNTER_SETTINGS[collectible.id]} isn't set`);
+    return undefined;
+  }
   const commentId = asCommentId(setting);
   try {
     const comment = await reddit.getCommentById(commentId);
