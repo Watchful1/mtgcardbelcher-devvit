@@ -1,10 +1,10 @@
 // An in-memory stand-in for Devvit's Redis, for tests.
 
-import type { RedisPort } from './store';
+import type { RedisPort } from '../store';
 
 export class FakeRedis implements RedisPort {
-  readonly strings = new Map<string, { value: string; expiresAt: number | undefined }>();
-  readonly hashes = new Map<string, Map<string, string>>();
+  private readonly strings = new Map<string, { value: string; expiresAt: number | undefined }>();
+  private readonly hashes = new Map<string, Map<string, string>>();
 
   constructor(private readonly now: () => number = Date.now) {}
 

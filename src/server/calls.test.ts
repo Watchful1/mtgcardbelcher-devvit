@@ -8,7 +8,21 @@ test('finds plain and escaped calls', () => {
 });
 
 test('ignores single brackets and empty or nested calls', () => {
-  assert.deepEqual(findCalls('[Bolt] [[]] [[a[b]] text'), []);
+  assert.deepEqual(findCalls('[Bolt] [[]] [[ ]] [[a[b]] text'), []);
+});
+
+test('removes the rich-text editor escapes inside a call', () => {
+  assert.deepEqual(findCalls('\\[\\[Some\\_Name\\]\\]'), ['Some_Name']);
+});
+
+test('ignores nested escaped calls, as it does plain ones', () => {
+  assert.deepEqual(findCalls('\\[\\[a\\[b\\]\\]'), []);
+});
+
+test('a call never spans lines, is trimmed, and is at most 150 characters', () => {
+  assert.deepEqual(findCalls('[[start of a thought\nand the end]]'), []);
+  assert.deepEqual(findCalls('[[  Lightning Bolt ]]'), ['Lightning Bolt']);
+  assert.deepEqual(findCalls(`[[${'x'.repeat(151)}]] [[${'y'.repeat(150)}]]`), ['y'.repeat(150)]);
 });
 
 const NOW = 1_000_000_000;

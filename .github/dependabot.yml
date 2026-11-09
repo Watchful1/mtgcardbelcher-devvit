@@ -12,6 +12,8 @@ updates:
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
     cooldown:
+      # Wait a week after a release before proposing it, except for Devvit's own packages.
+      default-days: 7
       exclude:
         - "devvit"
         - "@devvit/*"
@@ -29,3 +31,7 @@ updates:
         patterns:
           - "vite"
           - "@vitejs/*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -8,7 +8,10 @@
   "triggers": {
     "onAppInstall": "/internal/triggers/on-app-install",
     "onCommentCreate": "/internal/triggers/on-comment-create",
-    "onPostCreate": "/internal/triggers/on-post-create"
+    "onPostCreate": "/internal/triggers/on-post-create",
+    "onPostFlairUpdate": "/internal/triggers/on-post-flair-update",
+    "onPostDelete": "/internal/triggers/on-post-delete",
+    "onModAction": "/internal/triggers/on-mod-action"
   },
   "scheduler": {
     "tasks": {
@@ -25,7 +28,7 @@
     "items": [
       {
         "label": "Rebuild MTGCardBelcher image pool",
-        "description": "Re-read the newest 1,000 r/MTGCardBelcher posts, dropping images that were reflaired or deleted.",
+        "description": "On r/MTGCardBelcher, rebuild the image pool from the newest 1,000 posts. Elsewhere, reload it from r/MTGCardBelcher.",
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/rebuild-pool"
@@ -52,6 +55,11 @@
       "negateCounterCommentId": {
         "type": "string",
         "label": "Id of the comment holding Negate's collector number (leave unset to disable the art)"
+      },
+      "curationDryRun": {
+        "type": "boolean",
+        "label": "Curation dry run: log the flair changes curation would make on r/MTGCardBelcher, and make none",
+        "defaultValue": true
       }
     }
   },
@@ -67,7 +75,9 @@
     "redis": true,
     "http": {
       "enable": true,
-      "domains": ["api.scryfall.com"]
+      "domains": [
+        "api.scryfall.com"
+      ]
     }
   }
 }

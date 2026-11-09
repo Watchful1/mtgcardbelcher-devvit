@@ -2,10 +2,6 @@
 
 export const FOOTER = '*********\n\nSubmit your content at: r/MTGCardBelcher';
 
-export const RASTAMON_HEADER = "Rastamonliveup has delivered the cards you're looking for:\n\n";
-
-export const GYANDU_FLAVOUR = '_Tell the children the truth_\n\n';
-
 export const CREATURE_TYPES = [
   'Horrors', 'Kobolds', 'Goblins', 'Zombies', 'Vampires', 'Werewolves', 'Legitimate Businesspeople',
   'Brushwaggs', 'Camarids', 'Giants', 'Devils', 'Hydras', 'Krakens', 'Nightmares', 'Dragons',

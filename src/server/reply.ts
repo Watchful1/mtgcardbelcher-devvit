@@ -1,15 +1,13 @@
 // Building the reply text for an item's calls. Pure: randomness and Scryfall
 // results are passed in.
 
-import { waitingCollectible } from './data/collectibles';
-import { findRastamonCard, GALATIANS, KUKA_BEYO, SEBI_GYANDU } from './data/rastamon';
+import { highestPriorityCollectible } from './data/collectibles';
+import { findRastamonCard, RASTAMON_BLANK_FLAVOUR, RASTAMON_HEADER, type RastamonCard } from './data/rastamon';
 import {
   CREATURE_TYPES,
   creatureHeader,
   FOOTER,
-  GYANDU_FLAVOUR,
   LINKLESS_REPLIES,
-  RASTAMON_HEADER,
   REVEL_IN_RICHES_IMAGE,
   SPECIAL_HEADERS,
 } from './data/replies';
@@ -19,7 +17,7 @@ export const MAX_REPLY_LENGTH = 2400;
 
 // Each reply rolls one of this many equally likely outcomes: 0 is a linkless
 // reply, 1 a special header, anything else the normal creature header.
-const ROLL_OUTCOMES = 1002;
+export const ROLL_OUTCOMES = 1002;
 
 export interface ReplyInputs {
   calls: string[];
@@ -45,6 +43,14 @@ function pick<T>(items: T[], rng: () => number): T {
 
 function assemble(parts: ReplyParts): string {
   return `${parts.header}${parts.body}${parts.flavour}${FOOTER}`;
+}
+
+/**
+ * Whether the reply for these calls has card lines, and so needs the image pool
+ * and Scryfall. Waiting replies and the too-many-calls reply don't.
+ */
+export function needsCardData(calls: string[]): boolean {
+  return calls.length <= MAX_CALLS && highestPriorityCollectible(calls) === undefined;
 }
 
 export function buildReply(inputs: ReplyInputs): string {
@@ -73,7 +79,7 @@ function buildParts(inputs: ReplyInputs): ReplyParts {
   const { calls, rng } = inputs;
 
   // A collectible on cooldown takes over the whole reply.
-  const waiting = waitingCollectible(calls);
+  const waiting = highestPriorityCollectible(calls);
   if (waiting) {
     return {
       header: waiting.waitingHeader,
@@ -92,7 +98,13 @@ function buildParts(inputs: ReplyInputs): ReplyParts {
   };
 
   for (const call of calls) {
-    parts.body += cardLine(call, parts, inputs);
+    const { line, rastamon } = cardLine(call, inputs);
+    parts.body += line;
+    // A Rastamon card sets the header for the whole reply, and the last one sets its flavour.
+    if (rastamon) {
+      parts.header = RASTAMON_HEADER;
+      parts.flavour = rastamon.flavour ?? RASTAMON_BLANK_FLAVOUR;
+    }
   }
 
   if (calls.length === 1 && !parts.flavour && inputs.flavour) {
@@ -101,23 +113,18 @@ function buildParts(inputs: ReplyInputs): ReplyParts {
   return parts;
 }
 
-/** One body line for a call. Rastamon cards also change the header and flavour. */
-function cardLine(call: string, parts: ReplyParts, inputs: ReplyInputs): string {
-  if (call.toLowerCase() === 'revel in riches') return `[${call}](${REVEL_IN_RICHES_IMAGE})\n\n`;
+/** One body line for a call, and the Rastamon card it names, if any. */
+function cardLine(call: string, inputs: ReplyInputs): { line: string; rastamon?: RastamonCard } {
+  if (call.toLowerCase() === 'revel in riches') return { line: `[${call}](${REVEL_IN_RICHES_IMAGE})\n\n` };
 
   const rastamon = findRastamonCard(call);
   if (rastamon) {
-    parts.header = RASTAMON_HEADER;
-    // A non-empty flavour stops the Scryfall flavour being added.
-    parts.flavour = rastamon.name === SEBI_GYANDU ? GYANDU_FLAVOUR : '\n';
-    if (rastamon.name === KUKA_BEYO) return `[${rastamon.name}](${rastamon.image}) :)\n\n`;
-    if (rastamon.name === GALATIANS) return `[*${rastamon.name}*](${rastamon.image})\n\n`;
-    return `[${rastamon.name}](${rastamon.image})\n\n`;
+    return { line: `[${rastamon.linkText ?? rastamon.name}](${rastamon.image})${rastamon.suffix ?? ''}\n\n`, rastamon };
   }
 
   const joke = `[${call}](${pick(inputs.pool, inputs.rng)})`;
   const images = inputs.cardImages(call);
-  if (images.length === 1) return `${joke} - ([SF](${images[0]}))\n\n`;
-  if (images.length === 2) return `${joke} - ([S](${images[0]})[F](${images[1]}))\n\n`;
-  return `${joke}\n\n`;
+  if (images.length === 1) return { line: `${joke} - ([SF](${images[0]}))\n\n` };
+  if (images.length === 2) return { line: `${joke} - ([S](${images[0]})[F](${images[1]}))\n\n` };
+  return { line: `${joke}\n\n` };
 }

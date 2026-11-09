@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildReply, type ReplyInputs } from './reply';
+import { buildReply, ROLL_OUTCOMES, type ReplyInputs } from './reply';
 import { FOOTER } from './data/replies';
 
 /** An rng that returns the given values in turn, then 0.5 forever. */
@@ -12,7 +12,8 @@ function rngOf(...values: number[]): () => number {
 // 0.5 rolls the normal creature header.
 const NORMAL_ROLL = 0.5;
 const LINKLESS_ROLL = 0;
-const SPECIAL_ROLL = 1.5 / 1002;
+// Rolls land on outcome floor(rng * ROLL_OUTCOMES); 1.5 / ROLL_OUTCOMES lands on 1.
+const SPECIAL_ROLL = 1.5 / ROLL_OUTCOMES;
 
 function inputs(overrides: Partial<ReplyInputs>): ReplyInputs {
   return {

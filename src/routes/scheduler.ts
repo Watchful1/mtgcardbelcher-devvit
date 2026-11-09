@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { TaskResponse } from '@devvit/web/server';
 
-import { poolTick } from '../server/pool-tick';
+import { poolTick } from '../server/devvit/image-pool';
 
 export const scheduler = new Hono();
 

@@ -1,5 +1,7 @@
 # Belcher Playtest
 
+> **History.** The record of the app's first playtest, on 2026-11-08, run by u/Watchful1 with Claude. Paths and links are theirs. The image pool has changed since: installs other than r/MTGCardBelcher now read it from a wiki page, so step 14 and the `Image pool seeded` lines describe the old design.
+
 The first live test of the MTGCardBelcher Devvit app (`mtgcardbelcher-dev`) on r/mtgcardbelcher_de_dev. You start a playtest, post comments with card calls, and check each reply and log line. At the end, Claude collects the logs and records the results.
 
 Run it from: https://claude.ai/artifact/Qb2qmgR3HUGhFVwRbWftpn

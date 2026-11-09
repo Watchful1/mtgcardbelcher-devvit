@@ -9,13 +9,16 @@ import { fileURLToPath } from 'node:url';
 
 import Ajv from 'ajv';
 
+import { CONTINUE_TASK, COUNTER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
+
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(`${root}${path}`, 'utf8'));
 
 interface Config {
   triggers: Record<string, string>;
-  scheduler: { tasks: Record<string, { endpoint: string }> };
+  scheduler: { tasks: Record<string, { endpoint: string; cron?: string }> };
   menu: { items: { endpoint: string }[] };
+  settings: { global: Record<string, unknown> };
 }
 const config = readJson('devvit.json') as Config;
 
@@ -49,15 +52,14 @@ test('every trigger, task and menu endpoint is served', () => {
   }
 });
 
-test('the seeding continuation task exists and has no cron', async () => {
-  const { CONTINUE_TASK } = await import('../server/pool-tick-task');
-  const task = config.scheduler.tasks[CONTINUE_TASK] as { endpoint: string; cron?: string } | undefined;
+test('the seeding continuation task exists and has no cron', () => {
+  const task = config.scheduler.tasks[CONTINUE_TASK];
   assert.ok(task, `${CONTINUE_TASK} is not declared`);
   assert.equal(task.cron, undefined);
 });
 
-test('the counter settings named in code are declared', async () => {
-  const { COUNTER_SETTINGS } = await import('../server/counter-settings');
-  const settings = (readJson('devvit.json') as { settings: { global: Record<string, unknown> } }).settings.global;
-  for (const name of Object.values(COUNTER_SETTINGS)) assert.ok(name in settings, `${name} is not declared`);
+test('the settings named in code are declared', () => {
+  for (const name of [...Object.values(COUNTER_SETTINGS), CURATION_DRY_RUN_SETTING]) {
+    assert.ok(name in config.settings.global, `${name} is not declared`);
+  }
 });

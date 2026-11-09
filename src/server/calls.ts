@@ -1,14 +1,21 @@
 // Finding [[calls]] in comments and posts, and deciding which items to skip.
 
-// New Reddit's rich-text editor stores [[x]] as \[\[x\]\]; markdown mode and
-// mobile store it as typed. The two forms can't overlap, so no call is found twice.
-const ESCAPED_CALL = /\\\[\\\[([^\\[\]]+)\\]\\]/g;
-const PLAIN_CALL = /\[\[([^[\]]+)]]/g;
+// New Reddit's rich-text editor stores [[x]] as \[\[x\]\], and escapes other
+// markdown characters inside too (Some\_Name); markdown mode and mobile store
+// it as typed. The two forms can't overlap, so no call is found twice. A call
+// never spans lines.
+const ESCAPED_CALL = /\\\[\\\[((?:\\[^[\]\n]|[^\\[\]\n])+?)\\\]\\\]/g;
+const PLAIN_CALL = /\[\[([^[\]\n]+)]]/g;
+
+// The longest real card name is about 140 characters; anything longer isn't a call.
+export const MAX_CALL_LENGTH = 150;
 
 export function findCalls(text: string): string[] {
-  const escaped = [...text.matchAll(ESCAPED_CALL)].map((m) => m[1]!);
+  const escaped = [...text.matchAll(ESCAPED_CALL)].map((m) => m[1]!.replace(/\\(.)/g, '$1'));
   const plain = [...text.matchAll(PLAIN_CALL)].map((m) => m[1]!);
-  return [...escaped, ...plain];
+  return [...escaped, ...plain]
+    .map((call) => call.trim())
+    .filter((call) => call !== '' && call.length <= MAX_CALL_LENGTH);
 }
 
 const WEEKLY_UNJERK = /weekly.*unjerk/i;

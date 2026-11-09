@@ -1,6 +1,6 @@
 // Everything the app keeps in its per-install Redis.
 
-import { JOLLYVER, type PoolChanges } from './curation';
+import { JOLLYVER, type PoolChanges } from './image-pool';
 
 /** The slice of Devvit's Redis client this app uses, so tests can pass a fake. */
 export interface RedisPort {
@@ -12,17 +12,28 @@ export interface RedisPort {
   hDel(key: string, fields: string[]): Promise<unknown>;
 }
 
+/** How far seeding the source pool has got: the listing cursor and pages read so far. */
+export interface SeedProgress {
+  after: string;
+  pages: number;
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const KEYS = {
+  // On every install.
   replied: (itemId: string) => `replied:${itemId}`,
   cooldown: (collectibleId: string) => `cooldown:${collectibleId}`,
-  pool: 'pool',
-  // The cursor of the next page to read while seeding; absent once seeding is done.
-  seedCursor: 'pool:seed-cursor',
-  seeded: 'pool:seeded',
-  resetRequested: 'pool:reset-requested',
+  rateLimitedUntil: 'rate-limited-until',
   lock: 'lock:pool-tick',
+  // On installs that answer calls: the image URLs read from the wiki page, one per line.
+  poolCache: 'pool:images',
+  // On the r/MTGCardBelcher install: the pool itself, as a hash of post id → image URL.
+  sourcePool: 'source:pool',
+  sourceSeeded: 'source:seeded',
+  sourceSeedProgress: 'source:seed-progress',
+  sourceResetRequested: 'source:reset-requested',
+  sourcePageSettings: 'source:page-settings-applied',
 };
 
 export class Store {
@@ -51,58 +62,88 @@ export class Store {
     await this.redis.del(KEYS.cooldown(collectibleId));
   }
 
+  /** When Reddit's rate limit on the app's comments ends, if one is in force. */
+  async rateLimitedUntil(): Promise<number | undefined> {
+    const until = Number(await this.redis.get(KEYS.rateLimitedUntil));
+    return until > this.now() ? until : undefined;
+  }
+
+  async setRateLimitedUntil(untilMs: number): Promise<void> {
+    await this.redis.set(KEYS.rateLimitedUntil, String(untilMs), { expiration: new Date(untilMs) });
+  }
+
   /** The joke image URLs to pick from, always including Jollyver. */
   async pool(): Promise<string[]> {
-    return [JOLLYVER, ...Object.values(await this.redis.hGetAll(KEYS.pool))];
+    const cached = (await this.redis.get(KEYS.poolCache)) ?? '';
+    return [JOLLYVER, ...cached.split('\n').filter((url) => url !== '')];
   }
 
-  async applyPoolChanges(changes: PoolChanges): Promise<void> {
-    if (changes.add.size > 0) await this.redis.hSet(KEYS.pool, Object.fromEntries(changes.add));
-    if (changes.remove.length > 0) await this.redis.hDel(KEYS.pool, changes.remove);
+  async setPool(urls: string[]): Promise<void> {
+    await this.redis.set(KEYS.poolCache, urls.join('\n'));
   }
 
-  async seeded(): Promise<boolean> {
-    return (await this.redis.get(KEYS.seeded)) !== undefined;
+  /** The source pool's image URLs. */
+  async sourcePool(): Promise<string[]> {
+    return Object.values(await this.redis.hGetAll(KEYS.sourcePool));
   }
 
-  async seedCursor(): Promise<string | undefined> {
-    return this.redis.get(KEYS.seedCursor);
+  async applySourceChanges(changes: PoolChanges): Promise<void> {
+    if (changes.add.size > 0) await this.redis.hSet(KEYS.sourcePool, Object.fromEntries(changes.add));
+    if (changes.remove.length > 0) await this.redis.hDel(KEYS.sourcePool, changes.remove);
   }
 
-  async setSeedCursor(cursor: string): Promise<void> {
-    await this.redis.set(KEYS.seedCursor, cursor);
+  async sourceSeeded(): Promise<boolean> {
+    return (await this.redis.get(KEYS.sourceSeeded)) !== undefined;
+  }
+
+  async seedProgress(): Promise<SeedProgress | undefined> {
+    const saved = await this.redis.get(KEYS.sourceSeedProgress);
+    return saved ? (JSON.parse(saved) as SeedProgress) : undefined;
+  }
+
+  async setSeedProgress(progress: SeedProgress): Promise<void> {
+    await this.redis.set(KEYS.sourceSeedProgress, JSON.stringify(progress));
   }
 
   async finishSeeding(): Promise<void> {
-    await this.redis.set(KEYS.seeded, '1');
-    await this.redis.del(KEYS.seedCursor);
+    await this.redis.set(KEYS.sourceSeeded, '1');
+    await this.redis.del(KEYS.sourceSeedProgress);
   }
 
-  /** Empties the pool and starts seeding again from the newest post. */
-  async resetPool(): Promise<void> {
-    await this.redis.del(KEYS.pool, KEYS.seeded, KEYS.seedCursor);
+  /** Empties the source pool, so the next run seeds it again from the newest post. */
+  async resetSource(): Promise<void> {
+    await this.redis.del(KEYS.sourcePool, KEYS.sourceSeeded, KEYS.sourceSeedProgress);
   }
 
-  /** Asks the next pool tick to reset the pool before it runs. */
+  /** Asks the next pool run to reset the source pool before it runs. */
   async requestReset(): Promise<void> {
-    await this.redis.set(KEYS.resetRequested, '1');
+    await this.redis.set(KEYS.sourceResetRequested, '1');
   }
 
   /** True, once, if a reset was requested. */
   async takeResetRequest(): Promise<boolean> {
-    if ((await this.redis.get(KEYS.resetRequested)) === undefined) return false;
-    await this.redis.del(KEYS.resetRequested);
+    if ((await this.redis.get(KEYS.sourceResetRequested)) === undefined) return false;
+    await this.redis.del(KEYS.sourceResetRequested);
     return true;
   }
 
+  /** Whether the wiki page's permissions have been set. */
+  async pageSettingsApplied(): Promise<boolean> {
+    return (await this.redis.get(KEYS.sourcePageSettings)) !== undefined;
+  }
+
+  async setPageSettingsApplied(): Promise<void> {
+    await this.redis.set(KEYS.sourcePageSettings, '1');
+  }
+
   /**
-   * Takes the pool-tick lock, returning a release function, or undefined if
-   * another tick holds it. The TTL outlives a 30-second handler, so a live
-   * tick never loses it, and clears long before the next cron fire.
+   * Takes the pool-run lock, returning a release function, or undefined if
+   * another run holds it. The lock outlives a 30-second handler, so a live run
+   * never loses it, and clears long before the next cron fire.
    */
   async lockPoolTick(): Promise<(() => Promise<void>) | undefined> {
     const key = KEYS.lock;
-    const token = `${this.now()}-${Math.random()}`;
+    const token = this.token();
     if (!(await this.claim(key, new Date(this.now() + 60_000), token))) return undefined;
     return async () => {
       if ((await this.redis.get(key)) === token) await this.redis.del(key);
@@ -111,8 +152,12 @@ export class Store {
 
   // Redis's return value for a refused nx set isn't documented, so write a
   // unique token and read it back to see who owns the key.
-  private async claim(key: string, expiration: Date, token = `${this.now()}-${Math.random()}`): Promise<boolean> {
+  private async claim(key: string, expiration: Date, token = this.token()): Promise<boolean> {
     await this.redis.set(key, token, { nx: true, expiration });
     return (await this.redis.get(key)) === token;
+  }
+
+  private token(): string {
+    return `${this.now()}-${Math.random()}`;
   }
 }

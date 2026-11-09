@@ -57,8 +57,8 @@ export function firstCalledCollectible(calls: string[]): Collectible | undefined
   return undefined;
 }
 
-/** The first collectible, in list order, that any call names. */
-export function waitingCollectible(calls: string[]): Collectible | undefined {
+/** The first collectible, in list order, that any call names: the one a waiting reply is about. */
+export function highestPriorityCollectible(calls: string[]): Collectible | undefined {
   const lower = calls.map((call) => call.toLowerCase());
   return COLLECTIBLES.find((c) => lower.some((call) => c.spellings.includes(call)));
 }

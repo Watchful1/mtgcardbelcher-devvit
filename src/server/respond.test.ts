@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { FakeRedis } from './fake-redis';
 import { respond, type CallTarget, type RespondPorts } from './respond';
 import { Store } from './store';
+import { FakeRedis } from './testing/fake-redis';
 
 const NOW = 1_800_000_000_000;
 
@@ -25,6 +25,7 @@ function setup(overrides: Partial<RespondPorts> = {}) {
     nextCollectorNumber: async () => ++collectorNumber,
     reply: async (parentId, text) => {
       replies.push({ parentId, text });
+      return `t1_reply${replies.length}`;
     },
     rng: () => 0.5,
     now: clock,
@@ -98,6 +99,22 @@ test('more than 8 calls makes no Scryfall request', async () => {
   await respond(target(Array.from({ length: 9 }, (_, i) => `[[card ${i}]]`).join(' ')), ports);
   assert.match(replies[0]!.text, /<cue tumbleweed>/);
   assert.equal(scryfallCalls(), 0);
+});
+
+test('if the art reply fails, the cooldown is given back', async () => {
+  let failNext = true;
+  const { ports, replies } = setup({});
+  const reply = ports.reply;
+  ports.reply = async (parentId, text) => {
+    if (failNext) {
+      failNext = false;
+      throw new Error('rate-limited by Reddit');
+    }
+    return reply(parentId, text);
+  };
+  await assert.rejects(respond(target('[[Negate]]', { id: 't1_a' }), ports));
+  assert.equal(await respond(target('[[Negate]]', { id: 't1_b' }), ports), 'art');
+  assert.equal(replies.length, 1);
 });
 
 test('without a collector number set up, a collectible gets the waiting reply', async () => {

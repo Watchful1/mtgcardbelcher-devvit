@@ -6,10 +6,9 @@ import {
   COOLDOWN_MIN_SECONDS,
   firstCalledCollectible,
   renderArt,
-  waitingCollectible,
   type Collectible,
 } from './data/collectibles';
-import { buildReply, MAX_CALLS } from './reply';
+import { buildReply, needsCardData } from './reply';
 import type { Store } from './store';
 
 export interface CallTarget extends CallItem {
@@ -25,7 +24,8 @@ export interface RespondPorts {
   randomFlavour: () => Promise<string | undefined>;
   /** Adds one to a collectible's shared collector number and returns it, or undefined if it isn't set up. */
   nextCollectorNumber: (collectible: Collectible) => Promise<number | undefined>;
-  reply: (parentId: string, text: string) => Promise<void>;
+  /** Posts a reply and returns its comment id. */
+  reply: (parentId: string, text: string) => Promise<string>;
   rng: () => number;
   now: () => number;
 }
@@ -48,19 +48,23 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
   if (collectible) {
     const art = await collectibleArt(collectible, ports);
     if (art) {
-      await ports.reply(target.id, art);
-      console.log(`${collectible.name} art delivered on ${target.id}`);
+      try {
+        const replyId = await ports.reply(target.id, art);
+        console.log(`${collectible.name} art delivered on ${target.id} as ${replyId}`);
+      } catch (error) {
+        // Nobody got the art, so the next call can win it. The collector number stays used.
+        await ports.store.endCooldown(collectible.id);
+        throw error;
+      }
       return 'art';
     }
   }
 
-  // Waiting and too-many-calls replies have no card lines, so they need
-  // nothing from Scryfall or the pool.
-  const noCards = waitingCollectible(calls) !== undefined || calls.length > MAX_CALLS;
+  const needsCards = needsCardData(calls);
   const [pool, cards, flavour] = await Promise.all([
-    noCards ? [] : ports.store.pool(),
-    noCards ? new Map<string, string[]>() : ports.lookupCards(calls),
-    noCards || calls.length !== 1 ? undefined : ports.randomFlavour(),
+    needsCards ? ports.store.pool() : [],
+    needsCards ? ports.lookupCards(calls) : new Map<string, string[]>(),
+    needsCards && calls.length === 1 ? ports.randomFlavour() : undefined,
   ]);
 
   const text = buildReply({
@@ -70,7 +74,7 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
     cardImages: (call) => cards.get(call.toLowerCase()) ?? [],
     flavour,
   });
-  await ports.reply(target.id, text);
+  console.log(`Replied to ${target.id} as ${await ports.reply(target.id, text)}`);
   return 'reply';
 }
 
