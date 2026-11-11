@@ -61,8 +61,8 @@ The fix is for the subreddit's moderators to approve the app account, which lift
 Replies always pick from the pool plus Jollyver. If every joke link is Jollyver (`https://i.redd.it/pcmd6d3o1oad1.png`), the install has no pool:
 
 1. **On the replying subreddit's log**, look for the last `Image pool rebuilt` line, or a line saying the scan failed or ran out of time. A failed scan keeps the old pool, so an empty pool means no scan has finished since the install, or the last one found no approved images.
-2. **If scans fail:** the rest of the line says why. r/MTGCardBelcher must be public for other subreddits to read it.
-3. **If scans run out of time:** the line says after how many pages. The scan has 20 seconds; the playtest read 8 pages, the whole subreddit at the time, well inside that.
+2. **If scans fail:** the rest of the line says why. A single `14 UNAVAILABLE` error is Reddit's API being briefly unreachable, and the next scan recovers; it happened once in the 2026-11-10 playtest, straight after an upload. Repeated failures are worth a look. r/MTGCardBelcher must be public for other subreddits to read it.
+3. **If scans run out of time:** the line says after how many pages. The scan has 20 seconds; the 2026-11-10 playtest read 8 pages, the whole subreddit at the time, and found 594 images, well inside that.
 4. **If the scan finds 0 images:** check that r/MTGCardBelcher's posts have the *approved* flair. Curation, on r/MTGCardBelcher's install, sets it.
 5. **Then rescan:** run **Rebuild MTGCardBelcher image pool** from the replying subreddit's mod menu, instead of waiting for the next 30-minute run.
 
