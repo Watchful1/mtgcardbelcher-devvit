@@ -12,8 +12,8 @@ Moving MTGCardBelcher from its developer, u/Watchful1, to the original bot's own
    - `npx devvit settings set negateCounterCommentId`, value `t1_nn1eyru`
 4. **Check `sourceSubreddit` is `MTGCardBelcher`**, in case a test left it pointing at a test subreddit: `npx devvit settings list`. If it isn't, run `npx devvit settings set sourceSubreddit` and enter `MTGCardBelcher`.
 5. **Turn curation on** once a run's log on r/MTGCardBelcher shows sensible `Dry run:` lines: `npx devvit settings set curationDryRun`, value off.
-6. **Set the dev subreddit.** `dev.subreddit` in `devvit.json` is `mtgcardbelcher_de_dev`, which u/Watchful1 moderates. Either u/Watchful1 makes u/MustaKotka a moderator there, or u/MustaKotka puts a small test subreddit of their own there.
-7. **Uninstall the playtest install** from r/mtgcardbelcher_de_dev if it's no longer wanted: `npx devvit uninstall mtgcardbelcher_de_dev`. It still answers calls there.
+6. **Check the dev subreddit.** `dev.subreddit` in `devvit.json` is r/MTGCardBelcher_dev, which u/MustaKotka already moderates, so `npm run dev` works for them as it is.
+7. **Uninstall the app from r/mtgcardbelcher_de_dev**, u/Watchful1's old test subreddit: `npx devvit uninstall mtgcardbelcher_de_dev`. It still answers calls there.
 
 ## The repo
 

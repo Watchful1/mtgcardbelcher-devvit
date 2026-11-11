@@ -68,7 +68,7 @@
     }
   },
   "dev": {
-    "subreddit": "mtgcardbelcher_de_dev"
+    "subreddit": "MTGCardBelcher_dev"
   },
   "scripts": {
     "build": "vite build",
