@@ -22,9 +22,9 @@ Replace `magicthecirclejerking` with the subreddit. Without `--since` it shows o
 | `Negate art is off: negateCounterCommentId isn't set` | A call could have won the art, but that card has no counter comment set, so it got the waiting reply. Set the setting (see the README's configuration). |
 | `Skipping t1_…: too-old` | The trigger arrived more than 10 minutes after the comment, so it wasn't answered. |
 | `Skipping t1_…: excluded-thread` | The comment is under a weekly unjerk (or, for posts, bottom-scoring) thread. |
-| `Image pool loaded: N images` | The pool was read from r/MTGCardBelcher's wiki page. Every 30 minutes. |
+| `Image pool rebuilt: N images from P pages` | The 30-minute scan of r/MTGCardBelcher finished and replaced the pool. On every install. |
 | `Replying to t1_… failed: …` | The reply wasn't posted. The rest of the line says why. |
-| `Image pool page couldn't be read; keeping the cached pool` | See "No joke images" below. |
+| `Image pool scan failed, keeping the old pool: …` or `Image pool scan ran out of time…` | See "No joke images" below. |
 | `Scryfall … returned 4xx` / `Scryfall … failed` | Replies go out without `[SF]` links or flavour text until Scryfall answers again. |
 
 Comments with no calls, and the app's own comments, are skipped without a log line.
@@ -33,12 +33,10 @@ Comments with no calls, and the app's own comments, are skipped without a log li
 
 | Line | Means |
 |---|---|
-| `Image pool seeded from N pages` | The first run read the newest posts and filled the pool. |
 | `Dry run: would set flair of t3_… from pending to approved` | `curationDryRun` is on, so nothing changed. |
 | `Set flair of t3_… from pending to approved` | Curation changed a flair. |
-| `Image pool page written: N images` | The wiki page was written, because the pool changed or the page had been edited. It isn't written until the first seeding has finished. |
-| `The app is not a moderator of r/MTGCardBelcher…` | Curation and the pool are stopped until the app account is a moderator there again. |
-| `Pool run failed: …` | The 30-minute run failed; the next one tries again. |
+| `Setting flair of t3_… from pending to approved failed: …` | The next scan tries that change again. |
+| `The app is not a moderator of r/MTGCardBelcher, so it can't curate flairs` | Curation is stopped until the app account is a moderator there again. The pool scan still runs. |
 
 ## The bot stopped replying
 
@@ -62,17 +60,16 @@ The fix is for the subreddit's moderators to approve the app account, which lift
 
 Replies always pick from the pool plus Jollyver. If every joke link is Jollyver (`https://i.redd.it/pcmd6d3o1oad1.png`), the install has no pool:
 
-1. **On the replying subreddit's log**, look for `Image pool loaded` or `Reading r/MTGCardBelcher/wiki/mtgcardbelcher/image-pool failed`.
-2. **If the read failed:** open `https://www.reddit.com/r/MTGCardBelcher/wiki/mtgcardbelcher/image-pool`. The page must exist, and r/MTGCardBelcher's wiki must be readable by everyone.
-3. **If the page is missing or empty:** check r/MTGCardBelcher's log. The app must be a moderator there, and its first run must have logged `Image pool seeded`.
-4. **Then reload:** run **Rebuild MTGCardBelcher image pool** from the replying subreddit's mod menu. It reloads straight away instead of waiting for the next 30-minute run.
+1. **On the replying subreddit's log**, look for the last `Image pool rebuilt` line, or a line saying the scan failed or ran out of time. A failed scan keeps the old pool, so an empty pool means no scan has finished since the install, or the last one found no approved images.
+2. **If scans fail:** the rest of the line says why. r/MTGCardBelcher must be public for other subreddits to read it.
+3. **If scans run out of time:** the line says after how many pages. The scan has 20 seconds; the playtest read 8 pages, the whole subreddit at the time, well inside that.
+4. **If the scan finds 0 images:** check that r/MTGCardBelcher's posts have the *approved* flair. Curation, on r/MTGCardBelcher's install, sets it.
+5. **Then rescan:** run **Rebuild MTGCardBelcher image pool** from the replying subreddit's mod menu, instead of waiting for the next 30-minute run.
 
 ## Curation
 
 Curation runs every 30 minutes on r/MTGCardBelcher, and only looks at posts from the last 15 days: that's as far back as a post can still change flair.
 
-When a flair changes for any reason, at any post age, the app updates the pool and the wiki page straight away. That includes a moderator setting *approved* or *rejected* by hand, which is how to overrule the score rule. Removing or deleting a post takes it out of the pool, and approving a removed post puts it back.
-
-The wiki page is the app's: only moderators and approved wiki contributors can edit it, and each 30-minute run rewrites it if its images don't match the pool. Installs only take Reddit and Imgur image links from it.
+Every pool follows the flairs as they stand at each scan, at any post age. A moderator setting *approved* or *rejected* by hand, which is how to overrule the score rule, reaches every install within 30 minutes. So does removing, deleting or restoring a post.
 
 **After changing the curation rules,** turn `curationDryRun` on (`npx devvit settings set curationDryRun`), read one run's `Dry run:` lines, then turn it off again.

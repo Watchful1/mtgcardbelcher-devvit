@@ -5,7 +5,7 @@ import { poolTick } from '../server/devvit/image-pool';
 
 export const scheduler = new Hono();
 
-// Both the 30-minute cron and the one-off seeding continuation land here.
+// Every 30 minutes: rebuild the image pool, curating flairs on r/MTGCardBelcher.
 scheduler.post('/pool-tick', async (c) => {
   await poolTick();
   return c.json<TaskResponse>({}, 200);

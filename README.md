@@ -10,10 +10,12 @@ The app does different jobs depending on the subreddit it's installed on:
 
 | Installed on | What it does |
 |---|---|
-| r/MTGCardBelcher | Curates image submissions by flair (*new* → *pending* once a moderator approves the post → *approved* at score 50, or *rejected* after two weeks), and keeps the image pool on the wiki page `mtgcardbelcher/image-pool`. It answers no calls. |
-| Any other subreddit | Answers `[[calls]]` in new comments and self-posts, picking joke images from the pool it reads from that wiki page every 30 minutes. |
+| r/MTGCardBelcher | Curates image submissions by flair (*new* → *pending* once a moderator approves the post → *approved* at score 50, or *rejected* after two weeks). It answers no calls. The app account must be a moderator there. |
+| Any other subreddit | Answers `[[calls]]` in new comments and self-posts, picking joke images from its image pool. |
 
-To serve a new subreddit, install the app there: no code changes. Install it on r/MTGCardBelcher first, because the other installs read their images from there. The app account must be a moderator of r/MTGCardBelcher.
+Every install keeps its own image pool: every 30 minutes it reads r/MTGCardBelcher's newest 1,000 posts and replaces the pool with the approved images among them. Nothing is carried over between scans, so a removed or re-flaired post leaves every pool within 30 minutes.
+
+To serve a new subreddit, install the app there: no code changes. The pool doesn't depend on the r/MTGCardBelcher install; only curation does.
 
 [docs/features.md](docs/features.md) describes every reply and rule in detail.
 
@@ -29,7 +31,7 @@ All code is in `src/`. Everything under `src/server/` except `src/server/devvit/
 | How calls are found, skipped threads, ignored authors | `src/server/calls.ts` |
 | How a reply is put together, the 8-call and 2,400-character limits | `src/server/reply.ts` |
 | Score threshold, flair template ids, the curation rules | `src/server/flair-rules.ts` |
-| Which posts count as pool images | `src/server/image-pool.ts` |
+| Which posts count as pool images, and the 30-minute scan | `src/server/image-pool.ts` |
 | Scryfall lookups | `src/server/scryfall.ts` |
 | What happens on a trigger, cron run or menu click | `src/routes/` (each endpoint), then `src/server/devvit/` |
 
@@ -43,13 +45,12 @@ All code is in `src/`. Everything under `src/server/` except `src/server/devvit/
 |---|---|
 | `dreadmawCounterCommentId`, `stormCrowCounterCommentId`, `negateCounterCommentId` | The comment whose body holds each collectible's collector number. With or without `t1_`. Unset, calls for that card always get the "waiting" reply. The app can only edit comments it wrote. |
 | `curationDryRun` | On by default. While on, curation logs the flair changes it would make (`Dry run: would set flair of …`) and makes none. Turn it off once a run's log looks right. |
-| `sourceSubreddit` | Testing only. Names a test subreddit to use in place of r/MTGCardBelcher as the image source; its post flairs are found by name (New, Pending, Approved, Rejected, Other). Set it back to `MTGCardBelcher` afterwards, or every install reads the test subreddit. |
 
 **Moderator menu items:**
-- **Rebuild MTGCardBelcher image pool** (subreddit menu). On r/MTGCardBelcher it rebuilds the pool from the newest 1,000 posts. Elsewhere it reloads the pool from the wiki page straight away.
+- **Rebuild MTGCardBelcher image pool** (subreddit menu). Runs the 30-minute scan now, and says how many images the pool has. On r/MTGCardBelcher it curates too.
 - **Create MTGCardBelcher collector counters** (post menu). The app posts one counter comment per collectible under that post, each starting at the original bot's count, and logs their ids for the settings above.
 
-**Flair templates** on r/MTGCardBelcher are referred to by id (`MTGCARDBELCHER_FLAIRS` in `src/server/flair-rules.ts`). Recreating a template there gives it a new id, so the code has to be updated with it.
+**Flair templates** on r/MTGCardBelcher are referred to by id (`FLAIRS` in `src/server/flair-rules.ts`). Recreating a template there gives it a new id, so the code has to be updated with it.
 
 [docs/operations.md](docs/operations.md) covers logs, diagnosing problems and rate limits.
 
@@ -80,7 +81,6 @@ This runs `verify`, then `devvit publish`: a new version is built from your work
 - [docs/features.md](docs/features.md): what the bot does, rule by rule. **Reference.**
 - [docs/operations.md](docs/operations.md): running it day to day. **Reference.**
 - [docs/handover.md](docs/handover.md): moving the app and repo to the original bot's owner.
-- [docs/runbooks/pool-test.md](docs/runbooks/pool-test.md): testing the shared image pool with a test subreddit as the source.
 - [docs/migration-plan.md](docs/migration-plan.md) and [docs/runbooks/playtest.md](docs/runbooks/playtest.md): how the port from Python was planned and tested. **History.**
 
 ## App Migration Program

@@ -7,8 +7,7 @@ import { rebuildPool } from '../server/devvit/image-pool';
 
 export const menu = new Hono();
 
-// On r/MTGCardBelcher: rebuilds the pool from the newest 1,000 posts.
-// Elsewhere: reloads the pool from r/MTGCardBelcher's wiki page.
+// Rebuilds the image pool now, instead of at the next scheduled scan.
 menu.post('/rebuild-pool', async (c) => {
   return c.json<UiResponse>({ showToast: await rebuildPool() }, 200);
 });

@@ -8,19 +8,13 @@
   "triggers": {
     "onAppInstall": "/internal/triggers/on-app-install",
     "onCommentCreate": "/internal/triggers/on-comment-create",
-    "onPostCreate": "/internal/triggers/on-post-create",
-    "onPostFlairUpdate": "/internal/triggers/on-post-flair-update",
-    "onPostDelete": "/internal/triggers/on-post-delete",
-    "onModAction": "/internal/triggers/on-mod-action"
+    "onPostCreate": "/internal/triggers/on-post-create"
   },
   "scheduler": {
     "tasks": {
       "pool-tick": {
         "endpoint": "/internal/scheduler/pool-tick",
         "cron": "*/30 * * * *"
-      },
-      "pool-tick-continue": {
-        "endpoint": "/internal/scheduler/pool-tick"
       }
     }
   },
@@ -28,7 +22,7 @@
     "items": [
       {
         "label": "Rebuild MTGCardBelcher image pool",
-        "description": "On r/MTGCardBelcher, rebuild the image pool from the newest 1,000 posts. Elsewhere, reload it from r/MTGCardBelcher.",
+        "description": "Rebuild the image pool from r/MTGCardBelcher's newest 1,000 posts now, instead of at the next scheduled scan.",
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/rebuild-pool"
@@ -60,10 +54,6 @@
         "type": "boolean",
         "label": "Curation dry run: log the flair changes curation would make on r/MTGCardBelcher, and make none",
         "defaultValue": true
-      },
-      "sourceSubreddit": {
-        "type": "string",
-        "label": "Testing only: a subreddit to use as the image source in place of r/MTGCardBelcher. Leave unset, or set to MTGCardBelcher, for normal use."
       }
     }
   },

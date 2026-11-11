@@ -16,7 +16,7 @@ One app, installed on four subreddits. What each install does depends on which s
 | r/MTGCardBelcher | no | no | yes |
 
 - **Calls come in as triggers:** `onCommentCreate` and `onPostCreate`. These replace the PRAW streams and all the reconnect logic. Each install keeps a Redis key for every item it has already replied to, with a 1-day expiry, because triggers aren't guaranteed to be delivered exactly once.
-- **The image pool is a Redis hash, kept and added to.** _Superseded on 2026-11-08: the r/MTGCardBelcher install now keeps the only pool, updates it from flair-change, mod-action and delete triggers, and publishes it to a wiki page the other installs read (features.md §5)._ Each replying install keeps its own pool, because Devvit's Redis is separate for each install. The hash maps post ID → image URL; Jollyver is added when the pool is read. Reading another subreddit's posts from an install works (`devvit-apps` spike S2).
+- **The image pool is a Redis hash, kept and added to.** _Superseded on 2026-11-08 by a pool kept on r/MTGCardBelcher, updated from triggers and shared through a wiki page; that was superseded on 2026-11-10, as too much state to keep in step: every install now rescans r/MTGCardBelcher's newest 1,000 posts every 30 minutes and replaces its pool (features.md §5)._ Each replying install keeps its own pool, because Devvit's Redis is separate for each install. The hash maps post ID → image URL; Jollyver is added when the pool is read. Reading another subreddit's posts from an install works (`devvit-apps` spike S2).
   - **Seeding:** the first run reads r/MTGCardBelcher's newest 1,000 posts once and adds every eligible image.
   - **After that,** a 30-minute cron reads r/MTGCardBelcher from newest to oldest and stops at the first post older than 15 days. That window is enough because a post's flair only changes in its first two weeks: after 2 weeks pending, it is rejected. New posts arrive about once a month, so a normal run reads one page.
   - **Each run** adds posts flaired *approved* that pass the image checks, and removes posts in the window that no longer have that flair.
@@ -57,7 +57,7 @@ _Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) p
 ## Cutover
 
 1. `devvit publish` (unlisted), and apply to the App Migration Program to move the app onto the u/MTGCardBelcher account. Once that's done, follow [handover.md](handover.md).
-2. **Install on r/MTGCardBelcher first**, so the image pool's wiki page exists, and read one curation run's `Dry run:` lines before turning `curationDryRun` off.
+2. **Install on r/MTGCardBelcher**, and read one curation run's `Dry run:` lines before turning `curationDryRun` off.
 3. **Install on the other subreddits** at the same time as u/MustaKotka stops the PRAW bot, so the two never both reply to a call.
 4. Watch `devvit logs` for the first day ([operations.md](operations.md)).
 
@@ -67,6 +67,6 @@ _Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) p
 - **The capitalisation quirk is fixed** (features.md §5).
 - **Cooldowns are per subreddit.**
 - **Logging is `devvit logs` only.** There is no telemetry package.
-- **The image pool is kept, not rebuilt from 1,000 posts each run.** Since 2026-11-08 it is kept by the r/MTGCardBelcher install, updated from flair-change and delete triggers, and shared through a wiki page.
+- **The image pool is kept, not rebuilt from 1,000 posts each run.** Since 2026-11-10 this is reversed: every install rebuilds its pool from the newest 1,000 posts every 30 minutes, as the PRAW bot did.
 - **Images are approved on score ≥ 50 alone**, without the upvote ratio.
 - **Scryfall is used as planned.** Its domain is on Reddit's global allowlist, so it needs no review.

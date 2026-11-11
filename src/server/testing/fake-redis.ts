@@ -4,7 +4,6 @@ import type { RedisPort } from '../store';
 
 export class FakeRedis implements RedisPort {
   private readonly strings = new Map<string, { value: string; expiresAt: number | undefined }>();
-  private readonly hashes = new Map<string, Map<string, string>>();
 
   constructor(private readonly now: () => number = Date.now) {}
 
@@ -24,23 +23,6 @@ export class FakeRedis implements RedisPort {
   }
 
   async del(...keys: string[]): Promise<void> {
-    for (const key of keys) {
-      this.strings.delete(key);
-      this.hashes.delete(key);
-    }
-  }
-
-  async hGetAll(key: string): Promise<Record<string, string>> {
-    return Object.fromEntries(this.hashes.get(key) ?? []);
-  }
-
-  async hSet(key: string, fieldValues: Record<string, string>): Promise<void> {
-    const hash = this.hashes.get(key) ?? new Map<string, string>();
-    for (const [field, value] of Object.entries(fieldValues)) hash.set(field, value);
-    this.hashes.set(key, hash);
-  }
-
-  async hDel(key: string, fields: string[]): Promise<void> {
-    for (const field of fields) this.hashes.get(key)?.delete(field);
+    for (const key of keys) this.strings.delete(key);
   }
 }

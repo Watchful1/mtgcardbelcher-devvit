@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import Ajv from 'ajv';
 
-import { CONTINUE_TASK, COUNTER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
+import { COUNTER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(`${root}${path}`, 'utf8'));
@@ -50,12 +50,6 @@ test('every trigger, task and menu endpoint is served', () => {
   for (const { endpoint } of config.menu.items) {
     assertServed(endpoint, '/internal/menu', 'menu.ts', 'menu');
   }
-});
-
-test('the seeding continuation task exists and has no cron', () => {
-  const task = config.scheduler.tasks[CONTINUE_TASK];
-  assert.ok(task, `${CONTINUE_TASK} is not declared`);
-  assert.equal(task.cron, undefined);
 });
 
 test('the settings named in code are declared', () => {

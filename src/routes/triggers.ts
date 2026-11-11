@@ -3,17 +3,14 @@ import { context } from '@devvit/web/server';
 import type {
   OnAppInstallRequest,
   OnCommentCreateRequest,
-  OnModActionRequest,
   OnPostCreateRequest,
-  OnPostDeleteRequest,
-  OnPostFlairUpdateRequest,
   TriggerResponse,
 } from '@devvit/web/shared';
 
 import { asCommentId, asPostId } from '../server/ids';
-import { poolTick, postChanged, postDeleted } from '../server/devvit/image-pool';
+import { poolTick } from '../server/devvit/image-pool';
+import { sameSubreddit, SOURCE_SUBREDDIT } from '../server/flair-rules';
 import { respondPorts } from '../server/devvit/replies';
-import { isOnSource } from '../server/devvit/source';
 import { respond, type CallTarget } from '../server/respond';
 
 export const triggers = new Hono();
@@ -28,13 +25,8 @@ function toMs(timestamp: number): number {
 
 async function answer(target: CallTarget | undefined): Promise<void> {
   if (!target) return;
-  try {
-    // The source subreddit (r/MTGCardBelcher) is where images are submitted, not where calls are answered.
-    if (await isOnSource(context.subredditName)) return;
-  } catch (error) {
-    console.error(`Reading the source subreddit setting failed: ${String(error)}`);
-    return;
-  }
+  // r/MTGCardBelcher is where images are submitted, not where calls are answered.
+  if (sameSubreddit(context.subredditName, SOURCE_SUBREDDIT)) return;
   try {
     await respond(target, await respondPorts());
   } catch (error) {
@@ -72,52 +64,10 @@ triggers.post('/on-post-create', async (c) => {
   return c.json(ok, 200);
 });
 
-// The next three only act on the source subreddit, where they keep the image pool current.
-triggers.post('/on-post-flair-update', async (c) => {
-  const { post } = await c.req.json<OnPostFlairUpdateRequest>();
-  if (post) {
-    try {
-      await postChanged({ id: post.id, flairId: post.linkFlair?.templateId || undefined, url: post.url });
-    } catch (error) {
-      console.error(`Updating the image pool for ${post.id} failed: ${String(error)}`);
-    }
-  }
-  return c.json(ok, 200);
-});
-
-triggers.post('/on-post-delete', async (c) => {
-  const { postId } = await c.req.json<OnPostDeleteRequest>();
-  try {
-    await postDeleted(postId);
-  } catch (error) {
-    console.error(`Removing ${postId} from the image pool failed: ${String(error)}`);
-  }
-  return c.json(ok, 200);
-});
-
-// A moderator removing a post takes it out of the pool; approving it again puts it back.
-const REMOVALS = ['removelink', 'spamlink'];
-triggers.post('/on-mod-action', async (c) => {
-  const { action, targetPost: post } = await c.req.json<OnModActionRequest>();
-  if (post && action && (REMOVALS.includes(action) || action === 'approvelink')) {
-    try {
-      await postChanged({
-        id: post.id,
-        flairId: post.linkFlair?.templateId || undefined,
-        url: post.url,
-        removed: REMOVALS.includes(action),
-      });
-    } catch (error) {
-      console.error(`Updating the image pool for ${post.id} after ${action} failed: ${String(error)}`);
-    }
-  }
-  return c.json(ok, 200);
-});
-
 triggers.post('/on-app-install', async (c) => {
   const input = await c.req.json<OnAppInstallRequest>();
   console.log('App installed to subreddit: r/' + input.subreddit?.name);
-  // Start curating, or loading the image pool, straight away.
+  // Fill the image pool straight away, rather than at the next scheduled scan.
   await poolTick();
   return c.json(ok, 200);
 });
