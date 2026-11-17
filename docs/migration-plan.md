@@ -56,7 +56,7 @@ _Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) p
 
 ## Cutover
 
-1. `devvit publish` (unlisted), and apply to the App Migration Program to move the app onto the u/MTGCardBelcher account. Once that's done, follow [handover.md](handover.md).
+1. `devvit publish` (unlisted), and apply to the App Migration Program to move the app onto the u/MTGCardBelcher account. Then follow the [handover runbook](runbooks/handover.md), which also covers steps 2 to 4.
 2. **Install on r/MTGCardBelcher**, and read one curation run's `Dry run:` lines before turning `curationDryRun` off.
 3. **Install on the other subreddits** at the same time as u/MustaKotka stops the PRAW bot, so the two never both reply to a call.
 4. Watch `devvit logs` for the first day ([operations.md](operations.md)).

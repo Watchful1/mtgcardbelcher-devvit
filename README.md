@@ -33,7 +33,7 @@ On r/MTGCardBelcher itself, the app answers no calls; it moves image posts throu
 - [docs/features.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/features.md): every reply and rule in detail.
 - [docs/operations.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/operations.md): reading the logs and fixing problems.
 - [docs/development.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md): the code, settings, testing and releases.
-- [docs/handover.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/handover.md): moving the app and repo to the original bot's owner.
+- [docs/runbooks/handover.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/runbooks/handover.md): moving the app onto u/MTGCardBelcher, installing it, and handing the repo to the original bot's owner.
 - [docs/migration-plan.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/migration-plan.md) and [docs/runbooks/playtest.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/runbooks/playtest.md): how the port from the original Python bot, [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher), was planned and tested.
 
 ## App Migration Program
