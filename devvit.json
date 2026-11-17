@@ -26,30 +26,37 @@
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/rebuild-pool"
-      },
-      {
-        "label": "Create MTGCardBelcher collector counters",
-        "description": "Post a counter comment for each collectible under this post, and log their ids for the counter settings.",
-        "location": "post",
-        "forUserType": "moderator",
-        "endpoint": "/internal/menu/create-counters"
       }
     ]
   },
   "settings": {
+    "subreddit": {
+      "collectorNumbers": {
+        "type": "group",
+        "label": "Collector numbers",
+        "fields": {
+          "dreadmawCollectorNumber": {
+            "type": "number",
+            "label": "Colossal Dreadmaw: last collector number delivered",
+            "helpText": "The next Colossal Dreadmaw art gets a higher number. Raise it to skip ahead, for example after reinstalling the app. Lowering it has no effect.",
+            "defaultValue": 143
+          },
+          "stormCrowCollectorNumber": {
+            "type": "number",
+            "label": "Storm Crow: last collector number delivered",
+            "helpText": "The next Storm Crow art gets a higher number. Raise it to skip ahead, for example after reinstalling the app. Lowering it has no effect.",
+            "defaultValue": 42
+          },
+          "negateCollectorNumber": {
+            "type": "number",
+            "label": "Negate: last collector number delivered",
+            "helpText": "The next Negate art gets a higher number. Raise it to skip ahead, for example after reinstalling the app. Lowering it has no effect.",
+            "defaultValue": 18
+          }
+        }
+      }
+    },
     "global": {
-      "dreadmawCounterCommentId": {
-        "type": "string",
-        "label": "Id of the comment holding Colossal Dreadmaw's collector number (leave unset to disable the art)"
-      },
-      "stormCrowCounterCommentId": {
-        "type": "string",
-        "label": "Id of the comment holding Storm Crow's collector number (leave unset to disable the art)"
-      },
-      "negateCounterCommentId": {
-        "type": "string",
-        "label": "Id of the comment holding Negate's collector number (leave unset to disable the art)"
-      },
       "curationDryRun": {
         "type": "boolean",
         "label": "Curation dry run: log the flair changes curation would make on r/MTGCardBelcher, and make none",

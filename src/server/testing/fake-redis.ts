@@ -22,6 +22,12 @@ export class FakeRedis implements RedisPort {
     this.strings.set(key, { value, expiresAt: options?.expiration?.getTime() });
   }
 
+  async incrBy(key: string, value: number): Promise<number> {
+    const next = Number((await this.get(key)) ?? '0') + value;
+    this.strings.set(key, { value: String(next), expiresAt: undefined });
+    return next;
+  }
+
   async del(...keys: string[]): Promise<void> {
     for (const key of keys) this.strings.delete(key);
   }

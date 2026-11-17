@@ -3,21 +3,14 @@
 
 import type { Collectible } from './data/collectibles';
 
-// Global settings (set with `npx devvit settings set <key>`) naming the Reddit
-// comment whose body holds each collectible's collector number.
-export const COUNTER_SETTINGS: Record<Collectible['id'], string> = {
-  dreadmaw: 'dreadmawCounterCommentId',
-  stormCrow: 'stormCrowCounterCommentId',
-  negate: 'negateCounterCommentId',
-};
-
-// The PRAW bot's counter comments, owned by u/MTGCardBelcher. The app can read
-// them, but can edit them only once it runs as that account. New counter
-// comments start from their numbers.
-export const PRAW_COUNTER_COMMENTS: Record<Collectible['id'], string> = {
-  dreadmaw: 't1_me0tbmp',
-  stormCrow: 't1_mlnqxci',
-  negate: 't1_nn1eyru',
+// Subreddit settings, one per collectible, that moderators can change in the
+// app's install settings: the last collector number delivered on that
+// subreddit. The next win gets a higher number than both this and the count
+// the app keeps. Their defaults in devvit.json are the original bot's numbers.
+export const COLLECTOR_NUMBER_SETTINGS: Record<Collectible['id'], string> = {
+  dreadmaw: 'dreadmawCollectorNumber',
+  stormCrow: 'stormCrowCollectorNumber',
+  negate: 'negateCollectorNumber',
 };
 
 // Global setting: while true (the default), curation logs the flair changes it

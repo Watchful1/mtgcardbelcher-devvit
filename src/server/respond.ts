@@ -22,8 +22,8 @@ export interface RespondPorts {
   appUsername: string;
   lookupCards: (calls: string[]) => Promise<Map<string, string[]>>;
   randomFlavour: () => Promise<string | undefined>;
-  /** Adds one to a collectible's shared collector number and returns it, or undefined if it isn't set up. */
-  nextCollectorNumber: (collectible: Collectible) => Promise<number | undefined>;
+  /** The moderators' setting for a collectible: the next collector number must be higher than this. */
+  collectorNumberFloor: (collectible: Collectible) => Promise<number>;
   /** Posts a reply and returns its comment id. */
   reply: (parentId: string, text: string) => Promise<string>;
   rng: () => number;
@@ -49,8 +49,8 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
     const art = await collectibleArt(collectible, ports);
     if (art) {
       try {
-        const replyId = await ports.reply(target.id, art);
-        console.log(`${collectible.name} art delivered on ${target.id} as ${replyId}`);
+        const replyId = await ports.reply(target.id, art.text);
+        console.log(`${collectible.name} art No. ${art.number} delivered on ${target.id} as ${replyId}`);
       } catch (error) {
         // Nobody got the art, so the next call can win it. The collector number stays used.
         await ports.store.endCooldown(collectible.id);
@@ -79,20 +79,21 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
 }
 
 /**
- * The art reply, if the collectible's cooldown is open. Claims the cooldown
- * first, so two calls at once can't both win, then takes the next collector
- * number, both before the reply is posted. Undefined if the cooldown is
- * running or no collector number could be taken.
+ * The art reply and its collector number, if the collectible's cooldown is
+ * open. Claims the cooldown first, so two calls at once can't both win, then
+ * takes the next collector number, both before the reply is posted.
+ * Undefined if the cooldown is running.
  */
-async function collectibleArt(collectible: Collectible, ports: RespondPorts): Promise<string | undefined> {
+async function collectibleArt(collectible: Collectible, ports: RespondPorts): Promise<{ text: string; number: number } | undefined> {
   const span = COOLDOWN_MAX_SECONDS - COOLDOWN_MIN_SECONDS;
   const seconds = COOLDOWN_MIN_SECONDS + Math.floor(ports.rng() * (span + 1));
   if (!(await ports.store.claimCooldown(collectible.id, seconds))) return undefined;
-  const number = await ports.nextCollectorNumber(collectible);
-  if (number === undefined) {
+  try {
+    const number = await ports.store.nextCollectorNumber(collectible.id, await ports.collectorNumberFloor(collectible));
+    return { text: renderArt(collectible, number), number };
+  } catch (error) {
     // No art went out, so the next call can try again.
     await ports.store.endCooldown(collectible.id);
-    return undefined;
+    throw error;
   }
-  return renderArt(collectible, number);
 }

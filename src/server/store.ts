@@ -7,6 +7,7 @@ export interface RedisPort {
   get(key: string): Promise<string | undefined>;
   set(key: string, value: string, options?: { nx?: boolean; expiration?: Date }): Promise<unknown>;
   del(...keys: string[]): Promise<unknown>;
+  incrBy(key: string, value: number): Promise<number>;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -14,6 +15,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const KEYS = {
   replied: (itemId: string) => `replied:${itemId}`,
   cooldown: (collectibleId: string) => `cooldown:${collectibleId}`,
+  collectorNumber: (collectibleId: string) => `collector-number:${collectibleId}`,
   rateLimitedUntil: 'rate-limited-until',
   // The image URLs from the last full scan of r/MTGCardBelcher, one per line.
   pool: 'pool:images',
@@ -43,6 +45,21 @@ export class Store {
 
   async endCooldown(collectibleId: string): Promise<void> {
     await this.redis.del(KEYS.cooldown(collectibleId));
+  }
+
+  /**
+   * Takes a collectible's next collector number: one more than the last one
+   * taken on this install, and more than `atLeastAfter`, the moderators'
+   * setting. Only the call holding the collectible's cooldown calls this, so
+   * calls never overlap.
+   */
+  async nextCollectorNumber(collectibleId: string, atLeastAfter: number): Promise<number> {
+    const key = KEYS.collectorNumber(collectibleId);
+    const next = await this.redis.incrBy(key, 1);
+    if (next > atLeastAfter) return next;
+    // The first win on this install, or the moderators raised the setting.
+    await this.redis.set(key, String(atLeastAfter + 1));
+    return atLeastAfter + 1;
   }
 
   /** When Reddit's rate limit on the app's comments ends, if one is in force. */

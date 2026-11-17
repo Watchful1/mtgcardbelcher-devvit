@@ -22,12 +22,17 @@ All code is in `src/`. Everything under `src/server/` except `src/server/devvit/
 
 ## Configuration
 
-**Settings** are global, so they apply to every install. Set one with `npx devvit settings set <name>` from the repo, which then asks for the value.
+**Global settings** apply to every install. Set one with `npx devvit settings set <name>` from the repo, which then asks for the value.
 
 | Setting | What it does |
 |---|---|
-| `dreadmawCounterCommentId`, `stormCrowCounterCommentId`, `negateCounterCommentId` | The comment whose body holds each collectible's collector number. With or without `t1_`. Unset, calls for that card always get the "waiting" reply. The app can only edit comments it wrote. |
 | `curationDryRun` | On by default. While on, curation logs the flair changes it would make (`Dry run: would set flair of …`) and makes none. Turn it off once a run's log looks right. |
+
+**Subreddit settings** are set by each subreddit's moderators, in the app's install settings there:
+
+| Setting | What it does |
+|---|---|
+| `dreadmawCollectorNumber`, `stormCrowCollectorNumber`, `negateCollectorNumber` | The last collector number delivered for each card. The next win gets a higher number than this and the count the app keeps in Redis. Defaults to the original bot's last numbers, `lastPrawNumber` in `src/server/data/collectibles.ts`. |
 
 **Flair templates** on r/MTGCardBelcher are referred to by id (`FLAIRS` in `src/server/flair-rules.ts`). Recreating a template there gives it a new id, so the code has to be updated with it.
 

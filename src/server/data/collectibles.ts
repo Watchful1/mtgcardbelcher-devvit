@@ -10,6 +10,8 @@ export interface Collectible {
   waitingHeader: string;
   waitingImage: string;
   waitingFlavour: string;
+  /** The last collector number the original PRAW bot delivered; this app continues from it. */
+  lastPrawNumber: number;
 }
 
 // Order matters: when a call names several, the waiting reply uses the first
@@ -23,6 +25,7 @@ export const COLLECTIBLES: Collectible[] = [
     waitingHeader: 'Colossal Dreadmaw is nowhere to be _seen_.\n\n',
     waitingImage: 'https://i.redd.it/bvjzb0rfaike1.png',
     waitingFlavour: '_You feel the ground quake. Run!_\n\n',
+    lastPrawNumber: 143,
   },
   {
     id: 'stormCrow',
@@ -32,6 +35,7 @@ export const COLLECTIBLES: Collectible[] = [
     waitingHeader: 'The sky is clear! Not even a single cloud!\n\n',
     waitingImage: 'https://i.redd.it/ykxjrafd13te1.png',
     waitingFlavour: '_It tells you that the worst is coming. Do you listen?_\n\n',
+    lastPrawNumber: 42,
   },
   {
     id: 'negate',
@@ -41,6 +45,7 @@ export const COLLECTIBLES: Collectible[] = [
     waitingHeader: 'Oh no! It resolves:\n\n',
     waitingImage: 'https://i.redd.it/ebgrvw7grwzd1.png',
     waitingFlavour: '_You must draw more cards in order to find a Negate!_\n\n',
+    lastPrawNumber: 18,
   },
 ];
 

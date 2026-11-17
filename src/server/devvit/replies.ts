@@ -7,7 +7,7 @@ import { RateLimitedError, withRateLimitRetry } from '../rate-limit';
 import type { RespondPorts } from '../respond';
 import { lookupCards, randomFlavour } from '../scryfall';
 import type { Store } from '../store';
-import { nextCollectorNumber } from './counters';
+import { collectorNumberFloor } from './counters';
 import { appUsername, store } from './platform';
 
 /**
@@ -33,7 +33,7 @@ export async function respondPorts(): Promise<RespondPorts> {
     appUsername: await appUsername(),
     lookupCards: (calls) => lookupCards(calls),
     randomFlavour: () => randomFlavour(),
-    nextCollectorNumber,
+    collectorNumberFloor,
     reply: (parentId, text) => postReply(db, parentId, text),
     rng: Math.random,
     now: Date.now,

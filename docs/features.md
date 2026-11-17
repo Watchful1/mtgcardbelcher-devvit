@@ -53,7 +53,7 @@ The pool is every post with the **approved** flair whose URL is on `i.redd.it` o
 ## 5. Deliberate changes from the PRAW bot
 
 - **Capitalised collectible names get the waiting reply too.** The PRAW bot compares the text as typed against lowercase spellings (`text_functions.py:988`), so `[[Colossal Dreadmaw]]` during the cooldown gets a normal reply while `[[colossal dreadmaw]]` gets the waiting one. The port lowercases first, as the art check already does.
-- **Each subreddit has its own cooldown.** The PRAW bot shares one cooldown across all three subreddits because one process serves them all. The collector numbers stay shared.
+- **Each subreddit has its own cooldown and collector numbers.** The PRAW bot shares one cooldown across its subreddits because one process serves them all, and keeps each count in a Reddit comment it edits. The port keeps both in each install's Redis. The counts continue from the PRAW bot's last numbers (Dreadmaw 143, Storm Crow 42, Negate 18), which are the defaults of a moderator setting per card; raising the setting skips the count ahead, for example after a reinstall wipes Redis.
 - **It listens wherever it's installed.** There's no list of subreddits: each install answers calls on its own subreddit, except on r/MTGCardBelcher, which only curates.
 - **Removed posts leave the pool, and a failed scan keeps the old one.** Like the PRAW bot, every install rebuilds its pool from r/MTGCardBelcher's newest 1,000 posts every 30 minutes. Posts a moderator removed are left out. A scan that fails or runs out of time keeps the previous pool instead of replacing it with part of one.
 - **Curation only looks at the last 15 days of posts**, as far back as a flair can still change, and only sets "other" on posts with no flair template; it logs every change by flair name. A setting, `curationDryRun`, makes it log changes without making them.
@@ -61,7 +61,6 @@ The pool is every post with the **approved** flair whose URL is on `i.redd.it` o
 - **Scryfall finds more cards.** The PRAW bot gives no link for card layouts missing from its list, and its lookup misses names containing `&` or `//`. The port uses one rule for images ("`card_faces` images if there are two, otherwise `image_uris`"), looks names up with Scryfall's collection endpoint, and looks split cards up by their first face. Flavour text that sits only on a card's faces is used too.
 - **Images are approved on score alone.** The PRAW bot also required an upvote ratio of at least 0.85, which Devvit doesn't expose.
 - **No flavour line when Scryfall is down.** The PRAW bot's "Sometimes, rarely, Scryfall is not there…" line is left out.
-- **A collectible with no counter comment set up gets the waiting reply.** The collector number lives in a Reddit comment named by a setting; until it is set, the art can't be numbered, so calls get the waiting reply instead.
 
 ## Not ported (PRAW plumbing)
 

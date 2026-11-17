@@ -18,8 +18,7 @@ Replace `magicthecirclejerking` with the subreddit. Without `--since` it shows o
 |---|---|
 | `Answering t1_… (Lightning Bolt, Counterspell)` | A comment or post had calls; the app is replying. |
 | `Replied to t1_… as t1_…` | The reply is posted; the second id is the reply. |
-| `Colossal Dreadmaw art delivered on t1_… as t1_…` | A collectible's art went out. |
-| `Negate art is off: negateCounterCommentId isn't set` | A call could have won the art, but that card has no counter comment set, so it got the waiting reply. Set the setting (see Configuration in [development.md](development.md#configuration)). |
+| `Colossal Dreadmaw art No. 144 delivered on t1_… as t1_…` | A collectible's art went out, with that collector number. |
 | `Skipping t1_…: too-old` | The trigger arrived more than 10 minutes after the comment, so it wasn't answered. |
 | `Skipping t1_…: excluded-thread` | The comment is under a weekly unjerk (or, for posts, bottom-scoring) thread. |
 | `Image pool rebuilt: N images from P pages` | The 30-minute scan of r/MTGCardBelcher finished and replaced the pool. On every install. |
@@ -55,6 +54,12 @@ Reddit limits how fast an account can comment, hardest for a new account with li
 - **Longer waits:** the app skips replies until the wait ends, logging `Replying to … failed: rate-limited by Reddit until …` for each.
 
 The fix is for the subreddit's moderators to approve the app account, which lifts the limit there.
+
+## Collector numbers
+
+Each subreddit counts its own collector numbers, in its Redis. The app's install settings on that subreddit hold, per card, the last number delivered: the next win gets a higher number than both the setting and the count.
+
+**After a reinstall**, Redis starts empty, so the count falls back to the setting, which may be behind. Before the first win, find the last `… art No. N delivered` line for each card in the log (`npx devvit logs <subreddit> --since 7d`), and set each card's setting to that number in the app's install settings on the subreddit. Raising the setting is always safe; lowering it has no effect.
 
 ## No joke images, only Jollyver
 

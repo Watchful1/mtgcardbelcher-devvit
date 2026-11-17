@@ -12,7 +12,6 @@ function setup(overrides: Partial<RespondPorts> = {}) {
   const clock = () => now;
   const redis = new FakeRedis(clock);
   const replies: { parentId: string; text: string }[] = [];
-  let collectorNumber = 41;
   let scryfallCalls = 0;
   const ports: RespondPorts = {
     store: new Store(redis, clock),
@@ -22,7 +21,7 @@ function setup(overrides: Partial<RespondPorts> = {}) {
       return new Map([['lightning bolt', ['https://sf/bolt.jpg']]]);
     },
     randomFlavour: async () => 'It burns.',
-    nextCollectorNumber: async () => ++collectorNumber,
+    collectorNumberFloor: async () => 41,
     reply: async (parentId, text) => {
       replies.push({ parentId, text });
       return `t1_reply${replies.length}`;
@@ -117,8 +116,16 @@ test('if the art reply fails, the cooldown is given back', async () => {
   assert.equal(replies.length, 1);
 });
 
-test('without a collector number set up, a collectible gets the waiting reply', async () => {
-  const { ports, replies } = setup({ nextCollectorNumber: async () => undefined });
-  assert.equal(await respond(target('[[Storm Crow]]'), ports), 'reply');
-  assert.match(replies[0]!.text, /^The sky is clear!/);
+test('if taking a collector number fails, no art goes out and the cooldown is given back', async () => {
+  let fail = true;
+  const { ports, replies } = setup({
+    collectorNumberFloor: async () => {
+      if (fail) throw new Error('settings unavailable');
+      return 41;
+    },
+  });
+  await assert.rejects(respond(target('[[Storm Crow]]', { id: 't1_a' }), ports));
+  fail = false;
+  assert.equal(await respond(target('[[Storm Crow]]', { id: 't1_b' }), ports), 'art');
+  assert.equal(replies.length, 1);
 });

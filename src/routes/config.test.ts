@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 import Ajv from 'ajv';
 
-import { COUNTER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
+import { COLLECTOR_NUMBER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
+import { COLLECTIBLES } from '../server/data/collectibles';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(`${root}${path}`, 'utf8'));
@@ -18,7 +19,10 @@ interface Config {
   triggers: Record<string, string>;
   scheduler: { tasks: Record<string, { endpoint: string; cron?: string }> };
   menu: { items: { endpoint: string }[] };
-  settings: { global: Record<string, unknown> };
+  settings: {
+    global: Record<string, unknown>;
+    subreddit: Record<string, { fields: Record<string, { defaultValue?: unknown }> }>;
+  };
 }
 const config = readJson('devvit.json') as Config;
 
@@ -53,7 +57,13 @@ test('every trigger, task and menu endpoint is served', () => {
 });
 
 test('the settings named in code are declared', () => {
-  for (const name of [...Object.values(COUNTER_SETTINGS), CURATION_DRY_RUN_SETTING]) {
-    assert.ok(name in config.settings.global, `${name} is not declared`);
+  assert.ok(CURATION_DRY_RUN_SETTING in config.settings.global, `${CURATION_DRY_RUN_SETTING} is not declared`);
+});
+
+test("each collector number setting is declared, defaulting to the original bot's last number", () => {
+  const fields = config.settings.subreddit['collectorNumbers']!.fields;
+  for (const collectible of COLLECTIBLES) {
+    const name = COLLECTOR_NUMBER_SETTINGS[collectible.id];
+    assert.equal(fields[name]?.defaultValue, collectible.lastPrawNumber, `${name}`);
   }
 });
