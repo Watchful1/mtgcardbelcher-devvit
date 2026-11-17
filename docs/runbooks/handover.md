@@ -46,7 +46,7 @@ Nothing in Parts 1 to 4 is irreversible: P3 uninstalls the app from a subreddit.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit logs MTGCardBelcher
   ```
-  **Expect:** the log starts streaming. A message that there is no installation yet is fine until step 4.
+  **Expect:** the log starts streaming. Before the install, it may print its header and return to the prompt: run the same command again straight after step 4.
 
 - [ ] **4. Install the app on r/MTGCardBelcher.** There, the app curates image flairs and answers no calls. Curation starts in dry run: it logs the flair changes it would make, and makes none.
   **Where:** Terminal.
@@ -60,10 +60,15 @@ Nothing in Parts 1 to 4 is irreversible: P3 uninstalls the app from a subreddit.
 
   If it shows `Set flair of` lines instead of `Dry run:` ones, dry run is off: use P2 now, then P1. If it shows `The app is not a moderator of r/MTGCardBelcher`, or a line with `failed`, use P1.
 
-- [ ] **5. Check the dry-run lines, then turn curation on.** Each `Dry run:` line from step 4 must move a post from `new` to `pending`, from `pending` to `approved` or `rejected`, or from `no flair` to `other`. If any line moves a post another way, stop and use P1. Otherwise run the command. It asks whether dry run is on: choose false (No), and press Enter.
+  **Done 2026-11-17:** `Image pool rebuilt: 603 images from 8 pages`, and one `Dry run:` line, from `new` to `approved`. The log stream from step 3 had returned to the prompt before the install, so the lines came from `npx devvit logs MTGCardBelcher --since 5m`.
+
+- [ ] **5. Check the dry-run lines, then turn curation on.** Each `Dry run:` line from step 4 must move a post from `new` to `pending`, `approved` or `rejected`, from `pending` to `approved` or `rejected`, or from `no flair` to `other`. (A post a moderator approved can pass through `pending` in one scan.) If any line moves a post another way, stop and use P1. Otherwise run the command. It asks for the value: type the text below, and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set curationDryRun
+  ```
+  ```text
+  false
   ```
   **Expect:** a message that the setting was saved.
   - If step 4 showed `Dry run:` lines, wait up to 30 minutes: the Logs window then shows a `Set flair of t3_… from … to …` line for each of them.
@@ -175,10 +180,13 @@ P1 applies at any step. P2 applies after step 4. P3 applies after steps 4 and 6.
   ```
   **Expect:** Claude reports the log lines that explain the problem, a fix, and the step to resume from. If the fix is a code change, it reaches the installs only after `npm run launch` and Reddit's approval: until then, stop at the step that failed.
 
-- [ ] **P2. Turn curation back to dry run.** Use this if curation changes flairs it shouldn't. The command asks whether dry run is on: choose true (Yes), and press Enter.
+- [ ] **P2. Turn curation back to dry run.** Use this if curation changes flairs it shouldn't. The command asks for the value: type the text below, and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set curationDryRun
+  ```
+  ```text
+  true
   ```
   **Expect:** a message that the setting was saved. Flairs already changed stay as they are; moderators can set them back by hand.
 
