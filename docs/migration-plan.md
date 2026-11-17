@@ -32,7 +32,7 @@ The decisions are pure functions, and Devvit calls go through ports that are pas
 
 ## Steps
 
-_Status 2026-11-08: steps 1–8 are done. The [playtest](runbooks/playtest.md) passed on r/mtgcardbelcher_de_dev. Curation is untested, since it runs only on r/MTGCardBelcher. Next is the cutover._
+_Status 2026-11-17: steps 1–8 are done, and the app is migrated onto u/MTGCardBelcher. The [playtest](runbooks/playtest.md) passed on r/mtgcardbelcher_de_dev. Curation is untested, since it runs only on r/MTGCardBelcher. Next are the installs in the [handover runbook](runbooks/handover.md)._
 
 1. **Register the app (u/Watchful1).** Create the app on the developer portal under a temporary name, since the account name `mtgcardbelcher` is already taken by the PRAW bot. Then run `npx devvit@latest init <code>` in this repo using the **Mod Tool Simple** template, and delete the nested `.git` it creates.
 2. **Fetch domain and legal docs.** Add `api.scryfall.com` to `permissions.http.domains` and write the README's `## Fetch Domains` section and App Migration Program note. It's on the global allowlist, so there's no review to wait for. Apps that use fetch also need terms of service and a privacy policy, linked from the app details page on the portal (`docs/legal/`).
