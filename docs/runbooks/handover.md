@@ -35,12 +35,12 @@ Step 5, the migration, is the point of no return: it can't be undone, and from t
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && git log -1 --oneline | Tee-Object -FilePath $HOME\belcher-launch-commit.txt && npm run launch
   ```
 
-- [ ] **2. Check the original bot's final collector numbers.** The app continues from Dreadmaw 143, Storm Crow 42 and Negate 18. Open the original counter comments' data, and find the three `"body"` values.
-  **Where:** Browser.
+- [ ] **2. Ask u/MustaKotka for the original bot's final collector numbers.** The app continues from Dreadmaw 143, Storm Crow 42 and Negate 18, the numbers in the original bot's counter comments on 10 November. Only u/MustaKotka knows which posts those comments are under. Send the message below.
+  **Where:** Chat.
   ```text
-  https://www.reddit.com/api/info.json?id=t1_me0tbmp,t1_mlnqxci,t1_nn1eyru
+  Hi! The new app continues the collector numbers from the old bot's counter comments (ids me0tbmp, mlnqxci and nn1eyru). On 10 November they read Dreadmaw 143, Storm Crow 42 and Negate 18. Could you check they still say that, or send me links to them? The old bot may have counted more before you stopped it.
   ```
-  **Expect:** the bodies are `143`, `42` and `18`, in that order. If any differs, write the three numbers down for step 15.
+  **Expect:** their answer. Go on meanwhile. If any number differs, write the three numbers down for step 15.
 
 - [ ] **3. Note where you can install the app yourself.** For r/MTGCardBelcher and r/magicthecirclejerking, check whether you are a moderator with full ("Everything") permissions. Open each moderator list from the blocks.
   **Where:** Browser.
