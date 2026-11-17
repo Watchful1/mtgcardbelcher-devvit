@@ -48,8 +48,15 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
   ```
   **Expect:** you know, for each of the three, whether you install it or u/MustaKotka arranges it. If you install all three, skip step 3.
 
-- [ ] **3. Let other moderators install the app.** Open the developer settings page, and look for a list of subreddits allowed to install the app ("Public Limited" mode). If it is there, add the three names in the second block, one per line, and save.
+- [ ] **3. Ask Reddit to let other moderators install the app.** Only moderators of allowlisted subreddits can install an unlisted app, and the allowlist ("Public Limited" mode) is turned on by request to r/Devvit modmail. Open the link in the first block, and send the message in the second.
   **Where:** Browser.
+  ```text
+  https://www.reddit.com/message/compose?to=r/Devvit
+  ```
+  ```text
+  Hi! Please turn on Public Limited mode for my unlisted app mtgcardbelcher-dev, the App Migration Program port of u/MTGCardBelcher, and allow r/MTGCardBelcher, r/magicthecirclejerking and r/edhcirclejerk. Their moderators need to install it themselves. Thanks!
+  ```
+  **Expect:** the message is sent. Go on with the runbook. When you reach an install that someone else does, wait there until r/Devvit answers, then open the developer settings page in the third block. If it lists allowed subreddits and the three aren't there, add the names in the fourth block, one per line, and save. The docs for this mode are in the last block.
   ```text
   https://developers.reddit.com/apps/mtgcardbelcher-dev/developer-settings
   ```
@@ -58,14 +65,8 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
   magicthecirclejerking
   edhcirclejerk
   ```
-  **Expect:** the page saves the three subreddits.
-  - If the page has no such list, the mode isn't on for this app. Send the message in the third block to r/Devvit modmail, from the link in the fourth block. Go on with the runbook; when you reach an install that someone else does, wait there for r/Devvit's answer.
-
   ```text
-  Hi! Please turn on Public Limited mode for my unlisted app mtgcardbelcher-dev, the App Migration Program port of u/MTGCardBelcher. The moderators of r/MTGCardBelcher, r/magicthecirclejerking and r/edhcirclejerk need to install it themselves. Thanks!
-  ```
-  ```text
-  https://www.reddit.com/message/compose?to=r/Devvit
+  https://developers.reddit.com/docs/guides/launch/launch-guide#share-an-unlisted-app-with-selected-communities
   ```
 
 ## Part 2 — the migration
