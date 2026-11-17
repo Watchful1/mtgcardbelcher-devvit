@@ -30,11 +30,11 @@ On r/MTGCardBelcher itself, the app answers no calls; it moves image posts throu
 
 ## More
 
-- [docs/features.md](docs/features.md): every reply and rule in detail.
-- [docs/operations.md](docs/operations.md): reading the logs and fixing problems.
-- [docs/development.md](docs/development.md): the code, settings, testing and releases.
-- [docs/handover.md](docs/handover.md): moving the app and repo to the original bot's owner.
-- [docs/migration-plan.md](docs/migration-plan.md) and [docs/runbooks/playtest.md](docs/runbooks/playtest.md): how the port from the original Python bot, [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher), was planned and tested.
+- [docs/features.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/features.md): every reply and rule in detail.
+- [docs/operations.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/operations.md): reading the logs and fixing problems.
+- [docs/development.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md): the code, settings, testing and releases.
+- [docs/handover.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/handover.md): moving the app and repo to the original bot's owner.
+- [docs/migration-plan.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/migration-plan.md) and [docs/runbooks/playtest.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/runbooks/playtest.md): how the port from the original Python bot, [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher), was planned and tested.
 
 ## App Migration Program
 
@@ -48,9 +48,9 @@ This app replaces the Data API bot u/MTGCardBelcher, a PRAW script. It runs unde
 
 ## Terms and privacy
 
-- [Terms of Service](docs/legal/terms.md)
-- [Privacy Policy](docs/legal/privacy-policy.md)
+- [Terms of Service](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/terms.md)
+- [Privacy Policy](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/privacy-policy.md)
 
 ## License
 
-GPL-3.0, as the original bot. See [LICENSE](LICENSE).
+GPL-3.0, as the original bot. See [LICENSE](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/LICENSE).

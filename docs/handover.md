@@ -17,5 +17,5 @@ Moving MTGCardBelcher from its developer, u/Watchful1, to the original bot's own
 ## The repo
 
 7. **Transfer the GitHub repo** (Settings → Transfer) to AetheriumSlinky, or add them as an admin. Then check that Actions and Dependabot are still on.
-8. **Update the operator in the terms and privacy policy** (`docs/legal/`): replace u/Watchful1 with the new operator, and update "Last updated". If the repo's URL changes, update the two links on the app's developer settings page too.
+8. **Update the operator in the terms and privacy policy** (`docs/legal/`): replace u/Watchful1 with the new operator, and update "Last updated". If the repo's URL changes, update the two links on the app's developer settings page, and the GitHub links in the README, which have to be full URLs because the README is also the app's page on developers.reddit.com.
 9. **Update the README's App Migration Program section**, which still describes the temporary name.
