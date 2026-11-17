@@ -1,6 +1,6 @@
 # Belcher Handover
 
-Moves MTGCardBelcher onto the u/MTGCardBelcher account, installs it on its subreddits, and hands the repo to the original bot's owner, u/MustaKotka. The PRAW bot is already stopped, so nothing replies to calls until the installs in Parts 4 and 5.
+Moves MTGCardBelcher onto the u/MTGCardBelcher account, installs it on its subreddits, and hands the repo to the original bot's owner, u/MustaKotka. The PRAW bot is already stopped, so nothing replies to calls until the installs in Parts 3 and 4.
 
 Each install can be done in one of two ways, and the install steps give both:
 - **You install it**, if you are a moderator of that subreddit with full ("Everything") permissions.
@@ -16,7 +16,7 @@ Where:
 - **Chat**: a Reddit chat with u/MustaKotka.
 - **Claude**: this Claude session.
 
-Step 4, the migration, is the point of no return: it can't be undone, and from then on the app replies as u/MTGCardBelcher. Every install after it can be undone by uninstalling. You can stop after any step from 8 on, and resume at the next unticked step another day. Part 7 can wait.
+Step 4, the migration, is the point of no return: it can't be undone, and from then on the app replies as u/MTGCardBelcher. Every install after it can be undone by uninstalling. You can stop after any step from 5 on, and resume at the next unticked step another day. Part 6 can wait.
 
 ---
 
@@ -27,7 +27,7 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
   ```text
   https://developers.reddit.com/apps/mtgcardbelcher-dev
   ```
-  **Expect:** the highest version number in the picker is approved. Write that number down for step 6.
+  **Expect:** the highest version number in the picker is approved.
   - If the highest version is still in review, wait for the approval, then do this step again.
   - If the repo has commits that you haven't launched, run the command below, wait for the approval, then do this step again. It records the launched commit in `$HOME\belcher-launch-commit.txt`.
 
@@ -83,53 +83,23 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
 
   If Claude reports a problem, stop and solve it with Claude before you go on.
 
-## Part 3 — check on r/MTGCardBelcher_dev
+## Part 3 — r/MTGCardBelcher
 
-- [ ] **6. Update the app on r/MTGCardBelcher_dev to the newest version.**
-  **Where:** Terminal.
-  ```powershell
-  cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit install MTGCardBelcher_dev
-  ```
-  **Expect:** a message that the app was installed, naming the version you wrote down in step 1. If it names another version, or fails, use P1.
-
-- [ ] **7. Comment a call on r/MTGCardBelcher_dev.** Comment the text in the second block on any post from the new posts.
-  **Where:** Browser.
-  ```text
-  https://www.reddit.com/r/MTGCardBelcher_dev/new/
-  ```
-  ```text
-  [[Lightning Bolt]]
-  ```
-  **Expect:** within a minute, a reply from **u/MTGCardBelcher** starting with a header line and then `Lightning Bolt` as a link.
-  - If the reply is from u/mtgcardbelcher-dev, the migration hasn't reached the app yet. Wait ten minutes, then comment again.
-  - If that happens twice, or no reply comes, use P1.
-
-- [ ] **8. Call Colossal Dreadmaw on r/MTGCardBelcher_dev.** This proves the collector numbers carry on from the original bot's. Each subreddit counts its own, so this doesn't use up a number on r/magicthecirclejerking. Comment the text below on the same post as step 7.
-  **Where:** Browser.
-  ```text
-  [[Colossal Dreadmaw]]
-  ```
-  **Expect:** within a minute, a reply from u/MTGCardBelcher with the Dreadmaw ASCII art. Its last line reads "You are No. 0144 to…" or a higher number.
-  - If the reply says "Colossal Dreadmaw is nowhere to be _seen_", the art went out on this subreddit less than two hours ago. Try again in two hours, or skip this step.
-  - If the art has another number, or no reply comes, use P1.
-
-## Part 4 — r/MTGCardBelcher
-
-- [ ] **9. Start curation in dry run.** Curation changes flairs on r/MTGCardBelcher. In dry run it only logs the changes it would make. The command asks whether dry run is on: choose true (Yes), and press Enter.
+- [ ] **6. Start curation in dry run.** Curation changes flairs on r/MTGCardBelcher. In dry run it only logs the changes it would make. The command asks whether dry run is on: choose true (Yes), and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set curationDryRun
   ```
   **Expect:** a message that the setting was saved. If it shows an error, use P1.
 
-- [ ] **10. Stream r/MTGCardBelcher's log.** Leave this window open until step 16.
+- [ ] **7. Stream r/MTGCardBelcher's log.** Leave this window open until step 13.
   **Where:** Logs.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit logs MTGCardBelcher
   ```
-  **Expect:** the log starts streaming. A message that there is no installation yet is fine until step 11.
+  **Expect:** the log starts streaming. A message that there is no installation yet is fine until step 8.
 
-- [ ] **11. Install the app on r/MTGCardBelcher.** There, the app curates image flairs and answers no calls.
+- [ ] **8. Install the app on r/MTGCardBelcher.** There, the app curates image flairs and answers no calls.
   - **If you install it,** run the first block.
   - **If u/MustaKotka arranges it,** run the second block. It copies a message to your clipboard: paste it into the Chat, and wait for their answer.
 
@@ -147,19 +117,19 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
 
   If the log shows `The app is not a moderator of r/MTGCardBelcher`, or a line with `failed`, use P1.
 
-- [ ] **12. Check the dry-run lines, then turn curation on.** Each `Dry run:` line from step 11 must move a post from `new` to `pending`, from `pending` to `approved` or `rejected`, or from `no flair` to `other`. If any line moves a post another way, stop and use P1. Otherwise run the command. It asks whether dry run is on: choose false (No), and press Enter.
+- [ ] **9. Check the dry-run lines, then turn curation on.** Each `Dry run:` line from step 8 must move a post from `new` to `pending`, from `pending` to `approved` or `rejected`, or from `no flair` to `other`. If any line moves a post another way, stop and use P1. Otherwise run the command. It asks whether dry run is on: choose false (No), and press Enter.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit settings set curationDryRun
   ```
   **Expect:** a message that the setting was saved.
-  - If step 11 showed `Dry run:` lines, wait up to 30 minutes: the Logs window then shows a `Set flair of t3_… from … to …` line for each of them.
-  - If step 11 showed none, there is nothing to change yet. Go on.
+  - If step 8 showed `Dry run:` lines, wait up to 30 minutes: the Logs window then shows a `Set flair of t3_… from … to …` line for each of them.
+  - If step 8 showed none, there is nothing to change yet. Go on.
   - If a line shows `Setting flair of … failed`, use P1.
 
-## Part 5 — r/magicthecirclejerking
+## Part 4 — r/magicthecirclejerking
 
-- [ ] **13. Install the app on r/magicthecirclejerking.**
+- [ ] **10. Install the app on r/magicthecirclejerking.**
   - **If you install it,** run the first block.
   - **If u/MustaKotka arranges it,** run the second block. Paste the message into the Chat, and wait for their answer.
 
@@ -172,7 +142,7 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
   ```
   **Expect:** a message that the app was installed, or u/MustaKotka's answer that it's done. If the install fails, use P1.
 
-- [ ] **14. Comment a call on r/magicthecirclejerking.** Comment the text in the second block on any recent post, such as a daily thread.
+- [ ] **11. Comment a call on r/magicthecirclejerking.** Comment the text in the second block on any recent post, such as a daily thread.
   **Where:** Browser.
   ```text
   https://www.reddit.com/r/magicthecirclejerking/new/
@@ -180,25 +150,27 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
   ```text
   [[Lightning Bolt]]
   ```
-  **Expect:** within a minute, a reply from u/MTGCardBelcher with `Lightning Bolt` as a link. If no reply comes within two minutes, use P1.
+  **Expect:** within a minute, a reply from **u/MTGCardBelcher** with `Lightning Bolt` as a link.
+  - If the reply is from u/mtgcardbelcher-dev, the migration hasn't reached the app yet. Wait ten minutes, then comment again.
+  - If that happens twice, or no reply comes within two minutes, use P1.
 
-## Part 6 — tidy up
+## Part 5 — tidy up
 
-- [ ] **15. Uninstall the app from r/mtgcardbelcher_de_dev,** your old test subreddit. Its stored data, the replied-to list and cooldowns, goes with it; nothing there is needed.
+- [ ] **12. Uninstall the app from r/mtgcardbelcher_de_dev,** your old test subreddit. Its stored data, the replied-to list and cooldowns, goes with it; nothing there is needed.
   **Where:** Terminal.
   ```powershell
   cd C:\Users\greg\Desktop\Projects\mtgcardbelcher-devvit && npx devvit uninstall mtgcardbelcher_de_dev
   ```
   **Expect:** a message that the app was uninstalled, or that it isn't installed there. Either is fine.
 
-- [ ] **16. Stop the log stream.** Press Ctrl+C.
+- [ ] **13. Stop the log stream.** Press Ctrl+C.
   **Where:** Logs.
   **Expect:** the PowerShell prompt returns.
 
-- [ ] **17. Hand the results to Claude.** Claude reads the last three hours of the logs on r/MTGCardBelcher, r/magicthecirclejerking and r/MTGCardBelcher_dev, and asks you for the steps whose result differed from their Expect. Claude records the results in this runbook and in the docs, then commits and pushes them.
+- [ ] **14. Hand the results to Claude.** Claude reads the last three hours of the logs on r/MTGCardBelcher and r/magicthecirclejerking, and asks you for the steps whose result differed from their Expect. Claude records the results in this runbook and in the docs, then commits and pushes them.
   **Where:** Claude.
   ```text
-  Ready: do step 17 of the Belcher handover runbook.
+  Ready: do step 14 of the Belcher handover runbook.
   ```
   **Expect:** Claude reports:
   - the `Image pool rebuilt` line and the curation lines from r/MTGCardBelcher;
@@ -207,37 +179,37 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
 
   If Claude reports a failure, use P1 for it.
 
-## Part 7 — the repo (can wait)
+## Part 6 — the repo (can wait)
 
-- [ ] **18. Hand the repo's handover edits to Claude.** Claude asks you for the GitHub account the repo goes to and the Reddit username of whoever runs the app from now on. Claude names them in the terms and privacy policy, points the README's links at the new repo address, commits and pushes, and saves the two new policy addresses for step 21.
+- [ ] **15. Hand the repo's handover edits to Claude.** Claude asks you for the GitHub account the repo goes to and the Reddit username of whoever runs the app from now on. Claude names them in the terms and privacy policy, points the README's links at the new repo address, commits and pushes, and saves the two new policy addresses for step 18.
   **Where:** Claude.
   ```text
-  Ready: do step 18 of the Belcher handover runbook.
+  Ready: do step 15 of the Belcher handover runbook.
   ```
   **Expect:** Claude reports the commit and the two new addresses.
 
-- [ ] **19. POINT OF NO RETURN: transfer the GitHub repo.** Open the repo's settings, scroll to "Danger Zone", click **Transfer**, and enter the account from step 18 and the repo name `mtgcardbelcher-devvit`. Only the new owner can transfer it back.
+- [ ] **16. POINT OF NO RETURN: transfer the GitHub repo.** Open the repo's settings, scroll to "Danger Zone", click **Transfer**, and enter the account from step 15 and the repo name `mtgcardbelcher-devvit`. Only the new owner can transfer it back.
   **Where:** Browser.
   ```text
   https://github.com/Watchful1/mtgcardbelcher-devvit/settings
   ```
   **Expect:** GitHub says the transfer is pending until the new owner accepts.
 
-- [ ] **20. Wait for the new owner to accept the transfer.** Ask them in the Chat if they haven't seen GitHub's email.
+- [ ] **17. Wait for the new owner to accept the transfer.** Ask them in the Chat if they haven't seen GitHub's email.
   **Where:** Chat.
-  **Expect:** the old address redirects to the new owner's repo. Until it does, don't do step 21: the new policy addresses don't exist yet.
+  **Expect:** the old address redirects to the new owner's repo. Until it does, don't do step 18: the new policy addresses don't exist yet.
   ```text
   https://github.com/Watchful1/mtgcardbelcher-devvit
   ```
 
-- [ ] **21. Update the terms and privacy links on the app's developer settings page.** The command prints the two new addresses and opens the page. Replace the terms link with the first address and the privacy link with the second, and save.
+- [ ] **18. Update the terms and privacy links on the app's developer settings page.** The command prints the two new addresses and opens the page. Replace the terms link with the first address and the privacy link with the second, and save.
   **Where:** Terminal, then Browser.
   ```powershell
   Get-Content $HOME\belcher-legal-urls.txt; Start-Process "$(Get-Content $HOME\belcher-app-url.txt)/developer-settings"
   ```
   **Expect:** the page saves the two links, and each opens its document on the new owner's GitHub.
 
-- [ ] **22. Give u/MustaKotka access to the app.** On the developer settings page from step 21, look for a way to add another developer or collaborator, and add u/MustaKotka, so they can publish, read logs and change settings.
+- [ ] **19. Give u/MustaKotka access to the app.** On the developer settings page from step 18, look for a way to add another developer or collaborator, and add u/MustaKotka, so they can publish, read logs and change settings.
   **Where:** Browser.
   **Expect:** u/MustaKotka is listed. If the page has no such option, send the message in the first block to r/Devvit modmail, from the link in the second block. Their answer says how to give access or transfer the app.
   ```text
@@ -249,7 +221,7 @@ Step 4, the migration, is the point of no return: it can't be undone, and from t
 
 ## If something goes wrong
 
-P1 applies at any step. P2 applies after step 12. P3 applies after steps 11 and 13.
+P1 applies at any step. P2 applies after step 9. P3 applies after steps 8 and 10.
 
 - [ ] **P1. Hand the problem to Claude.** Claude asks which step went wrong and what you saw, reads that subreddit's log, and reports the cause and a fix.
   **Where:** Claude.
@@ -287,13 +259,13 @@ P1 applies at any step. P2 applies after step 12. P3 applies after steps 11 and 
 4. Run `npx devvit settings list` in the repo, with about a 30-second timeout, and check that it lists `curationDryRun`.
 5. Report the name, whether it changed, the commit, and the settings check.
 
-**Step 17 ("Ready"):**
-1. In the repo, run `npx devvit logs <subreddit> --since 3h` for MTGCardBelcher, magicthecirclejerking and MTGCardBelcher_dev, each in the background for about 30 seconds, since they stream, then stop them. Keep the output in the scratchpad.
+**Step 14 ("Ready"):**
+1. In the repo, run `npx devvit logs <subreddit> --since 3h` for MTGCardBelcher and magicthecirclejerking, each in the background for about 30 seconds, since they stream, then stop them. Keep the output in the scratchpad.
 2. Ask Greg for the steps whose result differed from their Expect, and what he saw.
 3. Report the `Image pool rebuilt`, `Dry run:` and `Set flair of` lines from r/MTGCardBelcher, and every line containing `failed` or `not a moderator`, with what each means (docs/operations.md).
 4. Record the results: a `**Done <date>:**` note under each step that deviated, in `docs/runbooks/handover.md`; the migration plan's status line; and the README's App Migration Program section, which should now say the app runs as u/MTGCardBelcher. Re-render the runbook, republish it to its URL, then commit and push.
 
-**Step 18 ("Ready"):**
+**Step 15 ("Ready"):**
 1. Ask Greg for the GitHub account the repo goes to, and the Reddit username of the new operator.
 2. In `docs/legal/terms.md` and `docs/legal/privacy-policy.md`, replace u/Watchful1 as operator with the new one, and update "Last updated".
 3. In `README.md`, replace `https://github.com/Watchful1/mtgcardbelcher-devvit` with the new owner's address in every link.
@@ -303,6 +275,6 @@ P1 applies at any step. P2 applies after step 12. P3 applies after steps 11 and 
 
 **P1 ("Stuck"):**
 1. Ask Greg which step went wrong and what he saw.
-2. Read the log of the subreddit involved, as in step 17, for the last hour.
-3. Find the lines around the problem, read the code they point to, and report the cause, a fix, and the step to resume from. If the fix is a code change, make it, run `npm run verify`, and commit; push only while the repo is still Greg's (before step 19), otherwise give the change to the new owner. Tell Greg it needs `npm run launch` and Reddit's approval before the installs pick it up.
+2. Read the log of the subreddit involved, as in step 14, for the last hour.
+3. Find the lines around the problem, read the code they point to, and report the cause, a fix, and the step to resume from. If the fix is a code change, make it, run `npm run verify`, and commit; push only while the repo is still Greg's (before step 16), otherwise give the change to the new owner. Tell Greg it needs `npm run launch` and Reddit's approval before the installs pick it up.
 4. Add a `**Done <date>:**` note to the step, re-render, and republish.
