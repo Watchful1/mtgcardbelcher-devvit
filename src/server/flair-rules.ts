@@ -37,11 +37,6 @@ export function flairName(flairId: string | undefined): string {
 export const SCORE_THRESHOLD = 50;
 export const PENDING_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
 
-// Curation only changes pending and new posts, and a pending post is rejected
-// after PENDING_MAX_AGE_MS, so a day beyond that covers every change it will
-// make. Older posts are left as they are.
-export const CURATION_WINDOW_MS = PENDING_MAX_AGE_MS + 24 * 60 * 60 * 1000;
-
 export interface SourcePost {
   id: string;
   /** Link flair template id; undefined if the post has none. */

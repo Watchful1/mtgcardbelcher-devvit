@@ -99,22 +99,32 @@ test('installs other than r/MTGCardBelcher never set flairs', async () => {
   assert.deepEqual(flairsSet, []);
 });
 
-test('curation moves recent posts along, and a post it approves joins the pool in the same scan', async () => {
+test('curation moves posts along, and a post it approves joins the pool in the same scan', async () => {
   const { ports, flairsSet, pool } = setup(
     [
       post('new', 1, { flairId: FLAIRS.new, score: 1 }),
       post('hit', 2, { flairId: FLAIRS.pending, score: 60 }),
       post('settled', 3),
-      post('old', 30, { flairId: FLAIRS.pending, score: 60 }),
+      post('old-hit', 30, { flairId: FLAIRS.pending, score: 60 }),
+      post('old-miss', 40, { flairId: FLAIRS.new, score: 1 }),
+      post('unflaired', 500, { flairId: undefined }),
     ],
     { curate: 'live' },
   );
   await scanPool(ports);
+  // Posts of any age, so a backlog from while no bot ran is caught up.
   assert.deepEqual(flairsSet, [
     ['new', FLAIRS.pending],
     ['hit', FLAIRS.approved],
+    ['old-hit', FLAIRS.approved],
+    ['old-miss', FLAIRS.rejected],
+    ['unflaired', FLAIRS.other],
   ]);
-  assert.deepEqual(await pool(), ['https://i.redd.it/hit.png', 'https://i.redd.it/settled.png']);
+  assert.deepEqual(await pool(), [
+    'https://i.redd.it/hit.png',
+    'https://i.redd.it/settled.png',
+    'https://i.redd.it/old-hit.png',
+  ]);
 });
 
 test('a dry run changes no flairs, and the pool follows the flairs as they are', async () => {

@@ -73,7 +73,7 @@ Replies always pick from the pool plus Jollyver. If every joke link is Jollyver 
 
 ## Curation
 
-Curation runs every 30 minutes on r/MTGCardBelcher, and only looks at posts from the last 15 days: that's as far back as a post can still change flair.
+Curation runs every 30 minutes on r/MTGCardBelcher, over the same newest 1,000 posts as the pool scan. After the app has been off, the first runs catch up on posts that waited. If there are many, a run can run out of time: it keeps the flairs it set, logs `Image pool scan ran out of time`, and the next run carries on.
 
 Every pool follows the flairs as they stand at each scan, at any post age. A moderator setting *approved* or *rejected* by hand, which is how to overrule the score rule, reaches every install within 30 minutes. So does removing, deleting or restoring a post.
 

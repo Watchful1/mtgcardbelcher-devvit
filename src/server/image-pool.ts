@@ -2,7 +2,7 @@
 // to an image. Every install rebuilds its own pool by scanning the subreddit's
 // newest posts, and the r/MTGCardBelcher install curates flairs on the way.
 
-import { CURATION_WINDOW_MS, FLAIRS, flairName, nextFlair, type SourcePost } from './flair-rules';
+import { FLAIRS, flairName, nextFlair, type SourcePost } from './flair-rules';
 import type { Store } from './store';
 
 // Always in the pool, in memory of u/MTGLardFetcher.
@@ -72,10 +72,10 @@ export async function scanPool(ports: ScanPorts): Promise<number | undefined> {
   return urls.length;
 }
 
-/** Moves a recent post along the flair lifecycle, if this install curates. Returns the post as it now stands. */
+/** Moves a post along the flair lifecycle, if this install curates. Returns the post as it now stands. */
 async function curate(post: SourcePost, ports: ScanPorts): Promise<SourcePost> {
   const { curation } = ports;
-  if (!curation || ports.now() - post.createdAtMs > CURATION_WINDOW_MS) return post;
+  if (!curation) return post;
   const flair = nextFlair(post, ports.now());
   if (!flair) return post;
   const change = `flair of ${post.id} from ${flairName(post.flairId)} to ${flairName(flair)}`;
