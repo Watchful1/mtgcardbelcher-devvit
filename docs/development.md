@@ -56,4 +56,4 @@ Log in to Devvit once with `npm run login`.
 npm run launch
 ```
 
-This runs `verify`, then `devvit publish`: a new version is built from your working copy, uploaded with its source, and sent to Reddit for review. Run it from an up-to-date `main` with nothing uncommitted. Approval usually takes hours to a day. Publishing doesn't upgrade existing installs by itself. To move a subreddit you moderate onto the newest version, run `npx devvit install <subreddit> mtgcardbelcher-dev@latest`; other subreddits' moderators update it from the app's page on developers.reddit.com.
+This runs `verify`, then `devvit publish`: a new version is built from your working copy, uploaded with its source, and sent to Reddit for review. Run it from an up-to-date `main` with nothing uncommitted. Approval usually takes hours to a day. Publishing doesn't upgrade existing installs by itself. To move a subreddit you moderate onto the newest version, run `npx devvit install <subreddit> mtgcardbelcher@latest`; other subreddits' moderators update it from the app's page on developers.reddit.com.

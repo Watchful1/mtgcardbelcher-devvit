@@ -1,6 +1,6 @@
 {
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
-  "name": "mtgcardbelcher-dev",
+  "name": "mtgcardbelcher",
   "server": {
     "dir": "dist/server",
     "entry": "index.cjs"

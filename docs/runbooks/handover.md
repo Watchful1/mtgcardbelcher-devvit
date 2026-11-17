@@ -34,6 +34,8 @@ Nothing in Parts 1 to 4 is irreversible: P3 uninstalls the app from a subreddit.
 
   If Claude reports a problem, stop and solve it with Claude before you go on.
 
+  **Done 2026-11-17:** the migration renamed the app to `mtgcardbelcher` (shown as MTGCardBelcher); the code is renamed. `npx devvit logs` works under the new name. `npx devvit settings list` fails with `GetAppSettingsFields NOT_FOUND: app compute context was not found`, so step 7 and P2 can't change `curationDryRun` until that's fixed.
+
 - [ ] **2. Check that the app's newest version is approved.** The installs use the newest approved version, so it must hold the code you want to run. The command opens the app's page: open the version picker under "App permissions".
   **Where:** Terminal, then Browser.
   ```powershell
@@ -248,7 +250,7 @@ P1 applies at any step. P2 applies after step 6. P3 applies after steps 6 and 8.
 1. In the repo, run `npx devvit logs <subreddit> --since 3h` for MTGCardBelcher and magicthecirclejerking, each in the background for about 30 seconds, since they stream, then stop them. Keep the output in the scratchpad.
 2. Ask Greg for the steps whose result differed from their Expect, and what he saw.
 3. Report the `Image pool rebuilt`, `Dry run:` and `Set flair of` lines from r/MTGCardBelcher, and every line containing `failed` or `not a moderator`, with what each means (docs/operations.md).
-4. Record the results: a `**Done <date>:**` note under each step that deviated, in `docs/runbooks/handover.md`; the migration plan's status line; and the README's App Migration Program section, which should now say the app runs as u/MTGCardBelcher. Re-render the runbook, republish it to its URL, then commit and push.
+4. Record the results: a `**Done <date>:**` note under each step that deviated, in `docs/runbooks/handover.md`; and the migration plan's status line. Re-render the runbook, republish it to its URL, then commit and push.
 
 **Step 13 ("Ready"):**
 1. Ask Greg for the GitHub account the repo goes to, and the Reddit username of the new operator.

@@ -38,7 +38,7 @@ On r/MTGCardBelcher itself, the app answers no calls; it moves image posts throu
 
 ## App Migration Program
 
-This app replaces the Data API bot u/MTGCardBelcher, a PRAW script. It runs under the temporary name `mtgcardbelcher-dev` until Reddit moves it onto the u/MTGCardBelcher account.
+This app replaces the Data API bot u/MTGCardBelcher, a PRAW script. Reddit has moved the app onto the u/MTGCardBelcher account, so it replies under the original bot's name.
 
 ## Fetch Domains
 
