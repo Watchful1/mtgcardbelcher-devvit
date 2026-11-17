@@ -19,7 +19,7 @@ Replace `magicthecirclejerking` with the subreddit. Without `--since` it shows o
 | `Answering t1_… (Lightning Bolt, Counterspell)` | A comment or post had calls; the app is replying. |
 | `Replied to t1_… as t1_…` | The reply is posted; the second id is the reply. |
 | `Colossal Dreadmaw art delivered on t1_… as t1_…` | A collectible's art went out. |
-| `Negate art is off: negateCounterCommentId isn't set` | A call could have won the art, but that card has no counter comment set, so it got the waiting reply. Set the setting (see the README's configuration). |
+| `Negate art is off: negateCounterCommentId isn't set` | A call could have won the art, but that card has no counter comment set, so it got the waiting reply. Set the setting (see Configuration in [development.md](development.md#configuration)). |
 | `Skipping t1_…: too-old` | The trigger arrived more than 10 minutes after the comment, so it wasn't answered. |
 | `Skipping t1_…: excluded-thread` | The comment is under a weekly unjerk (or, for posts, bottom-scoring) thread. |
 | `Image pool rebuilt: N images from P pages` | The 30-minute scan of r/MTGCardBelcher finished and replaced the pool. On every install. |
