@@ -12,7 +12,7 @@ One app, installed on four subreddits. What each install does depends on which s
 
 | Install | Replies to calls | Builds image pool | Curates flairs |
 |---|---|---|---|
-| r/magicthecirclejerking, r/edhcirclejerk | yes | yes | no |
+| r/magicthecirclejerking (r/edhcirclejerk dropped 2026-11-16: defunct) | yes | yes | no |
 | r/MTGCardBelcher | no | no | yes |
 
 - **Calls come in as triggers:** `onCommentCreate` and `onPostCreate`. These replace the PRAW streams and all the reconnect logic. Each install keeps a Redis key for every item it has already replied to, with a 1-day expiry, because triggers aren't guaranteed to be delivered exactly once.
