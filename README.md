@@ -1,54 +1,39 @@
 # MTGCardBelcher
 
-A joke bot for r/magicthecirclejerking and friends. Call a card with `[[double brackets]]` and it replies with a random joke card image from r/MTGCardBelcher, plus a link to the real card if there is one.
+A joke bot for r/magicthecirclejerking. Call a card with `[[double brackets]]` and it replies with a random joke card from r/MTGCardBelcher, plus a link to the real card if there is one.
 
-## Calling cards
+## Usage
 
-Write card names in double brackets in a comment or a post, up to 8 per comment:
+Put up to 8 card names in double brackets in a comment or post:
 
 ```text
 [[Lightning Bolt]] is fine, but have you tried [[Grizzly Bears]]?
 ```
 
-Each name gets a link to a random joke image, and an `[SF]` link to the real card on Scryfall if it exists. A single call also gets a random flavour text.
-
-Some names do more:
-- **Colossal Dreadmaw, Storm Crow and Negate** are collectibles. Now and then a call wins the card's ASCII art, numbered with how many have been delivered. Between wins, calls get a "waiting" reply.
-- **A few community cards**, such as Rastamon's, get their own image.
+Colossal Dreadmaw, Storm Crow and Negate sometimes win numbered ASCII art.
 
 ## Submitting images
 
-The joke images are posts on r/MTGCardBelcher. A new image post waits for a moderator to approve it, then joins the pool once it reaches a score of 50. Posts that don't get there within two weeks are rejected. Moderators can approve or reject a post at any time by changing its flair.
+Post an image on r/MTGCardBelcher. Once a moderator approves the post, it has two weeks to reach a score of 50 and join the pool.
 
-## Installing it
+## Moderators
 
-The app is unlisted, so only its owner can install it, on subreddits where they're a moderator with full permissions ([how](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md#releasing)). It then answers calls in new comments and posts there; nothing else needs setting up. The bot skips weekly unjerk threads.
+*Rebuild MTGCardBelcher image pool* in the subreddit menu refreshes the images now instead of at the next 30-minute scan. On r/MTGCardBelcher the app only manages post flairs, and has to be a moderator.
 
-On r/MTGCardBelcher itself, the app answers no calls; it moves image posts through the flairs above. It must be a moderator there to do that.
-
-**Moderator menu:** *Rebuild MTGCardBelcher image pool* (in the subreddit menu) refreshes the joke images straight away, instead of waiting up to 30 minutes.
-
-## More
-
-- [docs/features.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/features.md): every reply and rule in detail.
-- [docs/operations.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/operations.md): reading the logs and fixing problems.
-- [docs/development.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md): the code, settings, testing and releases.
+For running or changing the bot, see [development.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md).
 
 ## App Migration Program
 
-This app replaces the Data API bot u/MTGCardBelcher, the PRAW script [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher). Reddit has moved the app onto the u/MTGCardBelcher account, so it replies under the original bot's name.
+Replaces the Data API bot u/MTGCardBelcher ([AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher)), and runs on the same account.
 
 ## Fetch Domains
 
-| Domain | Why |
-|---|---|
-| `api.scryfall.com` | Looks up whether each called name is a real Magic card, so the reply can link to the real card's image, and fetches a random flavour text for single-card replies. At most one `POST /cards/collection` and one `GET /cards/random` per reply, with the header `User-Agent: MTGCardBelcher/2.0`. The only user data sent is the card names typed in the call. |
+- `api.scryfall.com`: looks up called card names to link the real card, and gets a random flavour text. Only the card names in a call are sent.
 
 ## Terms and privacy
 
-- [Terms of Service](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/terms.md)
-- [Privacy Policy](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/privacy-policy.md)
+[Terms of Service](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/terms.md), [Privacy Policy](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/legal/privacy-policy.md)
 
 ## License
 
-GPL-3.0, as the original bot. See [LICENSE](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/LICENSE).
+[GPL-3.0](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/LICENSE)

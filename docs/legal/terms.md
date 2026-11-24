@@ -1,17 +1,11 @@
-# Terms of Service — MTGCardBelcher
+# MTGCardBelcher Terms of Service
 
-_Last updated: 30 October 2026_
+_Last updated: 23 November 2026_
 
-**MTGCardBelcher** is a Reddit app operated by u/Watchful1 and provided free of
-charge. Installing it on a subreddit means accepting these terms. Reddit's
-[User Agreement](https://www.redditinc.com/policies/user-agreement) and
-[Developer Terms](https://www.redditinc.com/policies/developer-terms) also apply.
+MTGCardBelcher is a free Reddit app operated by the r/magicthecirclejerking mod team. Installing it on a subreddit means accepting these terms. Reddit's [User Agreement](https://www.redditinc.com/policies/user-agreement) and [Developer Terms](https://www.redditinc.com/policies/developer-terms) also apply.
 
-The app is provided "as is". To the maximum extent permitted by law, the
-operator is not liable for any loss arising from use of the app.
+The app is provided "as is". To the maximum extent permitted by law, the operators are not liable for any loss arising from use of the app.
 
-The app may be changed or discontinued at any time, and moderators may uninstall
-it at any time.
+The app may be changed or discontinued at any time, and moderators may uninstall it at any time.
 
-See the [Privacy Policy](privacy-policy.md) for what the app stores. Contact
-u/Watchful1 on Reddit.
+See the [Privacy Policy](privacy-policy.md). Contact: r/magicthecirclejerking modmail.
