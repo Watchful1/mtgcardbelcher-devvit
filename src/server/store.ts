@@ -1,6 +1,6 @@
 // Everything the app keeps in its per-install Redis.
 
-import { JOLLYVER } from './image-pool';
+import { JOLLYVER } from './data/reply-texts';
 
 /** The slice of Devvit's Redis client this app uses, so tests can pass a fake. */
 export interface RedisPort {
@@ -84,12 +84,9 @@ export class Store {
 
   // Redis's return value for a refused nx set isn't documented, so write a
   // unique token and read it back to see who owns the key.
-  private async claim(key: string, expiration: Date, token = this.token()): Promise<boolean> {
+  private async claim(key: string, expiration: Date): Promise<boolean> {
+    const token = `${this.now()}-${Math.random()}`;
     await this.redis.set(key, token, { nx: true, expiration });
     return (await this.redis.get(key)) === token;
-  }
-
-  private token(): string {
-    return `${this.now()}-${Math.random()}`;
   }
 }

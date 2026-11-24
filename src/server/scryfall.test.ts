@@ -3,7 +3,10 @@ import { test } from 'node:test';
 
 import { cardImages, lookupCards, randomFlavour } from './scryfall';
 
-function fakeFetch(body: unknown, status = 200): { fetch: typeof fetch; requests: { url: string; init: RequestInit }[] } {
+function fakeFetch(
+  body: unknown,
+  status = 200,
+): { fetch: typeof fetch; requests: { url: string; init: RequestInit }[] } {
   const requests: { url: string; init: RequestInit }[] = [];
   const fn = (async (url: string, init: RequestInit) => {
     requests.push({ url, init });
@@ -14,7 +17,10 @@ function fakeFetch(body: unknown, status = 200): { fetch: typeof fetch; requests
 
 test('cardImages: single-faced, double-faced and content-warning cards', () => {
   assert.deepEqual(cardImages({ image_uris: { normal: 'one' } }), ['one']);
-  assert.deepEqual(cardImages({ card_faces: [{ image_uris: { normal: 'f' } }, { image_uris: { normal: 'b' } }] }), ['f', 'b']);
+  assert.deepEqual(cardImages({ card_faces: [{ image_uris: { normal: 'f' } }, { image_uris: { normal: 'b' } }] }), [
+    'f',
+    'b',
+  ]);
   // Split cards have faces but one shared image.
   assert.deepEqual(cardImages({ image_uris: { normal: 'split' }, card_faces: [{}, {}] }), ['split']);
   assert.deepEqual(cardImages({ content_warning: true, image_uris: { normal: 'one' } }), []);
@@ -34,10 +40,13 @@ test('lookupCards sends one request and maps results back past not_found', async
   assert.deepEqual(JSON.parse(String(requests[0]!.init.body)), {
     identifiers: [{ name: 'lightning bolt' }, { name: 'my made-up card' }, { name: 'delver of secrets' }],
   });
-  assert.deepEqual([...found], [
-    ['lightning bolt', ['bolt']],
-    ['delver of secrets', ['delver', 'insectile']],
-  ]);
+  assert.deepEqual(
+    [...found],
+    [
+      ['lightning bolt', ['bolt']],
+      ['delver of secrets', ['delver', 'insectile']],
+    ],
+  );
 });
 
 test('lookupCards looks up split cards by their first face', async () => {
@@ -45,6 +54,12 @@ test('lookupCards looks up split cards by their first face', async () => {
   const found = await lookupCards(['Fire // Ice'], fetch);
   assert.deepEqual(JSON.parse(String(requests[0]!.init.body)), { identifiers: [{ name: 'fire' }] });
   assert.deepEqual(found.get('fire // ice'), ['fire-ice']);
+});
+
+test('lookupCards leaves out calls with no name before the slashes', async () => {
+  const { fetch, requests } = fakeFetch({ data: [{ image_uris: { normal: 'bolt' } }], not_found: [] });
+  await lookupCards(['// foo', 'Lightning Bolt'], fetch);
+  assert.deepEqual(JSON.parse(String(requests[0]!.init.body)), { identifiers: [{ name: 'lightning bolt' }] });
 });
 
 test('lookupCards returns nothing when Scryfall fails', async () => {

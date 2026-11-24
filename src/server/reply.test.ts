@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { buildReply, ROLL_OUTCOMES, type ReplyInputs } from './reply';
-import { FOOTER } from './data/replies';
+import { FOOTER } from './data/reply-texts';
 
 /** An rng that returns the given values in turn, then 0.5 forever. */
 function rngOf(...values: number[]): () => number {
@@ -41,8 +41,13 @@ test('real cards get an SF link, or S and F links for two faces', () => {
     'Lightning Bolt': ['https://sf/bolt.jpg'],
     'Delver of Secrets': ['https://sf/front.jpg', 'https://sf/back.jpg'],
   };
-  const reply = buildReply(inputs({ calls: ['Lightning Bolt', 'Delver of Secrets'], cardImages: (c) => images[c] ?? [] }));
-  assert.match(reply, /\[Lightning Bolt\]\(https:\/\/i\.redd\.it\/joke\.png\) - \(\[SF\]\(https:\/\/sf\/bolt\.jpg\)\)\n\n/);
+  const reply = buildReply(
+    inputs({ calls: ['Lightning Bolt', 'Delver of Secrets'], cardImages: (c) => images[c] ?? [] }),
+  );
+  assert.match(
+    reply,
+    /\[Lightning Bolt\]\(https:\/\/i\.redd\.it\/joke\.png\) - \(\[SF\]\(https:\/\/sf\/bolt\.jpg\)\)\n\n/,
+  );
   assert.match(reply, / - \(\[S\]\(https:\/\/sf\/front\.jpg\)\[F\]\(https:\/\/sf\/back\.jpg\)\)\n\n/);
 });
 
@@ -53,7 +58,11 @@ test('a single call gets the flavour text; several calls do not', () => {
 
 test('roll 0 gives a linkless reply with no header or card lines', () => {
   const reply = buildReply(inputs({ rng: rngOf(LINKLESS_ROLL, 0) }));
-  assert.equal(reply, 'The Invasion annihilated the cards you were looking for.\n\nNothing but ashes and pain remain. Somehow you survive.\n\n' + FOOTER);
+  assert.equal(
+    reply,
+    'The Invasion annihilated the cards you were looking for.\n\nNothing but ashes and pain remain. Somehow you survive.\n\n' +
+      FOOTER,
+  );
 });
 
 test('roll 1 gives a special header', () => {
@@ -92,7 +101,10 @@ test('the waiting reply prefers Dreadmaw, then Storm Crow, then Negate', () => {
 });
 
 test('Revel in Riches links to the Negate screenshot', () => {
-  assert.match(buildReply(inputs({ calls: ['revel in RICHES'] })), /\[revel in RICHES\]\(https:\/\/i\.redd\.it\/7jkequbnkrzd1\.png\)\n\n/);
+  assert.match(
+    buildReply(inputs({ calls: ['revel in RICHES'] })),
+    /\[revel in RICHES\]\(https:\/\/i\.redd\.it\/7jkequbnkrzd1\.png\)\n\n/,
+  );
 });
 
 test('Rastamon cards use their own image, the Rastamon header and no Scryfall flavour', () => {

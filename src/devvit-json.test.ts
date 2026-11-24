@@ -9,10 +9,10 @@ import { fileURLToPath } from 'node:url';
 
 import Ajv from 'ajv';
 
-import { COLLECTOR_NUMBER_SETTINGS, CURATION_DRY_RUN_SETTING } from '../server/config';
-import { COLLECTIBLES } from '../server/data/collectibles';
+import { COLLECTOR_NUMBER_SETTINGS, CURATION_DRY_RUN_SETTING, isDryRun } from './server/config';
+import { COLLECTIBLES } from './server/data/collectibles';
 
-const root = fileURLToPath(new URL('../../', import.meta.url));
+const root = fileURLToPath(new URL('../', import.meta.url));
 const readJson = (path: string) => JSON.parse(readFileSync(`${root}${path}`, 'utf8'));
 
 interface Config {
@@ -20,7 +20,7 @@ interface Config {
   scheduler: { tasks: Record<string, { endpoint: string; cron?: string }> };
   menu: { items: { endpoint: string }[] };
   settings: {
-    global: Record<string, unknown>;
+    global: Record<string, { type: string; defaultValue?: unknown }>;
     subreddit: Record<string, { fields: Record<string, { defaultValue?: unknown }> }>;
   };
 }
@@ -56,8 +56,10 @@ test('every trigger, task and menu endpoint is served', () => {
   }
 });
 
-test('the settings named in code are declared', () => {
-  assert.ok(CURATION_DRY_RUN_SETTING in config.settings.global, `${CURATION_DRY_RUN_SETTING} is not declared`);
+test('curation dry run is declared as text, and on by default', () => {
+  const setting = config.settings.global[CURATION_DRY_RUN_SETTING];
+  assert.equal(setting?.type, 'string');
+  assert.ok(isDryRun(setting.defaultValue));
 });
 
 test("each collector number setting is declared, defaulting to the original bot's last number", () => {

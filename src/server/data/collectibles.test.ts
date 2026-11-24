@@ -17,6 +17,6 @@ test('renderArt stamps a zero-padded collector number in both places', () => {
   assert.ok(art.includes('You are No. 0042 to encounter Colossal Dreadmaw!'));
 });
 
-test('renderArt refuses numbers over 9999', () => {
-  assert.throws(() => renderArt(dreadmaw!, 10_000));
+test('renderArt prints numbers over 9999 in full', () => {
+  assert.ok(renderArt(dreadmaw!, 10_000).includes('You are No. 10000 to'));
 });

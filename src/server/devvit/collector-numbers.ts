@@ -3,10 +3,9 @@
 
 import { settings } from '@devvit/web/server';
 
-import { COLLECTOR_NUMBER_SETTINGS } from '../config';
+import { COLLECTOR_NUMBER_SETTINGS, collectorNumberOr } from '../config';
 import type { Collectible } from '../data/collectibles';
 
 export async function collectorNumberFloor(collectible: Collectible): Promise<number> {
-  const setting = await settings.get<number>(COLLECTOR_NUMBER_SETTINGS[collectible.id]);
-  return typeof setting === 'number' && Number.isFinite(setting) ? setting : collectible.lastPrawNumber;
+  return collectorNumberOr(await settings.get(COLLECTOR_NUMBER_SETTINGS[collectible.id]), collectible.lastPrawNumber);
 }

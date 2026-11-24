@@ -8,6 +8,7 @@ import {
   renderArt,
   type Collectible,
 } from './data/collectibles';
+import { RateLimitedError } from './rate-limit';
 import { buildReply, needsCardData } from './reply';
 import type { Store } from './store';
 
@@ -43,6 +44,10 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
   if (!(await ports.store.claimReply(target.id))) return 'duplicate';
 
   console.log(`Answering ${target.id} (${calls.join(', ')})`);
+
+  // Before anything is spent on a reply that can't be posted, such as a collector number.
+  const limitedUntil = await ports.store.rateLimitedUntil();
+  if (limitedUntil !== undefined) throw new RateLimitedError(limitedUntil);
 
   const collectible = firstCalledCollectible(calls);
   if (collectible) {
@@ -84,7 +89,10 @@ export async function respond(target: CallTarget, ports: RespondPorts): Promise<
  * takes the next collector number, both before the reply is posted.
  * Undefined if the cooldown is running.
  */
-async function collectibleArt(collectible: Collectible, ports: RespondPorts): Promise<{ text: string; number: number } | undefined> {
+async function collectibleArt(
+  collectible: Collectible,
+  ports: RespondPorts,
+): Promise<{ text: string; number: number } | undefined> {
   const span = COOLDOWN_MAX_SECONDS - COOLDOWN_MIN_SECONDS;
   const seconds = COOLDOWN_MIN_SECONDS + Math.floor(ports.rng() * (span + 1));
   if (!(await ports.store.claimCooldown(collectible.id, seconds))) return undefined;

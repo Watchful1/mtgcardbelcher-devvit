@@ -5,9 +5,6 @@
 import { FLAIRS, flairName, nextFlair, type SourcePost } from './flair-rules';
 import type { Store } from './store';
 
-// Always in the pool, in memory of u/MTGLardFetcher.
-export const JOLLYVER = 'https://i.redd.it/pcmd6d3o1oad1.png';
-
 export const PAGE_SIZE = 100;
 // Reddit lists at most a subreddit's newest 1,000 posts, as the PRAW bot read.
 export const MAX_PAGES = 10;
@@ -54,13 +51,12 @@ export async function scanPool(ports: ScanPorts): Promise<number | undefined> {
   let after: string | undefined;
   let pages = 0;
   do {
-    if (!ports.timeLeft()) {
-      console.error(`Image pool scan ran out of time after ${pages} pages; keeping the old pool`);
-      return undefined;
-    }
+    if (!ports.timeLeft()) return outOfTime(pages);
     const page = await ports.fetchPage(after);
     pages++;
     for (const fetched of page.posts) {
+      // Setting flairs takes time too, so check within the page.
+      if (!ports.timeLeft()) return outOfTime(pages);
       const post = await curate(fetched, ports);
       if (isPoolImage(post)) urls.push(post.url);
     }
@@ -70,6 +66,11 @@ export async function scanPool(ports: ScanPorts): Promise<number | undefined> {
   await ports.store.setPool(urls);
   console.log(`Image pool rebuilt: ${urls.length} images from ${pages} pages`);
   return urls.length;
+}
+
+function outOfTime(pages: number): undefined {
+  console.error(`Image pool scan ran out of time after ${pages} pages; keeping the old pool`);
+  return undefined;
 }
 
 /** Moves a post along the flair lifecycle, if this install curates. Returns the post as it now stands. */

@@ -2,6 +2,8 @@
 
 Running MTGCardBelcher day to day: reading its log, diagnosing problems, and the limits Reddit puts on it. Run every command here from the repo.
 
+Reddit hosts the app, so there's no server to run. Once a month, Dependabot opens pull requests that update the dependencies: merge them when CI passes, then [release](development.md#releasing) when convenient. Now and then, look for `failed` or `not a moderator` in each install's log.
+
 ## Reading the log
 
 Each install has its own log. Stream one with:
@@ -19,14 +21,14 @@ Replace `magicthecirclejerking` with the subreddit. Without `--since` it shows o
 | `Answering t1_… (Lightning Bolt, Counterspell)` | A comment or post had calls; the app is replying. |
 | `Replied to t1_… as t1_…` | The reply is posted; the second id is the reply. |
 | `Colossal Dreadmaw art No. 144 delivered on t1_… as t1_…` | A collectible's art went out, with that collector number. |
-| `Skipping t1_…: too-old` | The trigger arrived more than 10 minutes after the comment, so it wasn't answered. |
+| `Skipping t1_…: too-old` | The trigger arrived more than 10 minutes after the comment, so it wasn't answered, whether or not it had calls. |
 | `Skipping t1_…: excluded-thread` | The comment is under a weekly unjerk (or, for posts, bottom-scoring) thread. |
 | `Image pool rebuilt: N images from P pages` | The 30-minute scan of r/MTGCardBelcher finished and replaced the pool. On every install. |
 | `Replying to t1_… failed: …` | The reply wasn't posted. The rest of the line says why. |
 | `Image pool scan failed, keeping the old pool: …` or `Image pool scan ran out of time…` | See "No joke images" below. |
-| `Scryfall … returned 4xx` / `Scryfall … failed` | Replies go out without `[SF]` links or flavour text until Scryfall answers again. |
+| `Scryfall … returned 4xx` or `5xx` / `Scryfall … failed` | Replies go out without `[SF]` links or flavour text until Scryfall answers again. |
 
-Comments with no calls, and the app's own comments, are skipped without a log line.
+Comments with no calls, and the app's own comments, are skipped without a log line unless they arrived late.
 
 ### On r/MTGCardBelcher
 
@@ -36,11 +38,12 @@ Comments with no calls, and the app's own comments, are skipped without a log li
 | `Set flair of t3_… from pending to approved` | Curation changed a flair. |
 | `Setting flair of t3_… from pending to approved failed: …` | The next scan tries that change again. |
 | `The app is not a moderator of r/MTGCardBelcher, so it can't curate flairs` | Curation is stopped until the app account is a moderator there again. The pool scan still runs. |
+| `App installed to subreddit: r/…` | The app was installed. On every install. |
 
 ## The bot stopped replying
 
 1. **Look for an `Answering` line** after a test call: `npx devvit logs <subreddit> --since 15m`.
-   - **None at all:** check the app is still installed on that subreddit, and that the call is on one line, in double brackets, and under 150 characters.
+   - **None at all:** check the app is still installed on that subreddit, and that the call is on one line, in double brackets, and at most 150 characters. Titles, edits, r/MTGCardBelcher, u/MTGCardFetcher and weekly unjerk threads are never answered.
    - **`Skipping …: too-old`:** Reddit delivered the trigger late. That happens during Reddit outages.
 2. **`Answering`, but no `Replied to`:** read the `Replying to … failed` line.
    - **`rate-limited by Reddit until …`:** see "Rate limits" below.
@@ -59,15 +62,15 @@ The fix is for the subreddit's moderators to approve the app account, which lift
 
 Each subreddit counts its own collector numbers, in its Redis. The app's install settings on that subreddit hold, per card, the last number delivered: the next win gets a higher number than both the setting and the count.
 
-**After a reinstall**, Redis starts empty, so the count falls back to the setting, which may be behind. Before the first win, find the last `… art No. N delivered` line for each card in the log (`npx devvit logs <subreddit> --since 7d`), and set each card's setting to that number in the app's install settings on the subreddit. Raising the setting is always safe; lowering it has no effect.
+**After a reinstall**, Redis starts empty, so the count falls back to the setting, which may be behind. Before the first win, find the last `… art No. N delivered` line for each card in the log (`npx devvit logs <subreddit> --since 7d`), and set each card's setting to that number in the app's install settings on the subreddit. Lowering a setting has no effect. A setting that isn't a whole number of 0 or more is ignored. Double-check before raising one: the count can't go back down without a reinstall.
 
 ## No joke images, only Jollyver
 
 Replies always pick from the pool plus Jollyver. If every joke link is Jollyver (`https://i.redd.it/pcmd6d3o1oad1.png`), the install has no pool:
 
 1. **On the replying subreddit's log**, look for the last `Image pool rebuilt` line, or a line saying the scan failed or ran out of time. A failed scan keeps the old pool, so an empty pool means no scan has finished since the install, or the last one found no approved images.
-2. **If scans fail:** the rest of the line says why. A single `14 UNAVAILABLE` error is Reddit's API being briefly unreachable, and the next scan recovers; it happened once in the 2026-11-10 playtest, straight after an upload. Repeated failures are worth a look. r/MTGCardBelcher must be public for other subreddits to read it.
-3. **If scans run out of time:** the line says after how many pages. The scan has 20 seconds; the 2026-11-10 playtest read 8 pages, the whole subreddit at the time, and found 594 images, well inside that.
+2. **If scans fail:** the rest of the line says why. A single `14 UNAVAILABLE` error is Reddit's API being briefly unreachable, and the next scan recovers. Repeated failures are worth a look. r/MTGCardBelcher must be public for other subreddits to read it.
+3. **If scans run out of time:** the line says after how many pages. The scan has 20 seconds, normally ample for its 10 pages.
 4. **If the scan finds 0 images:** check that r/MTGCardBelcher's posts have the *approved* flair. Curation, on r/MTGCardBelcher's install, sets it.
 5. **Then rescan:** run **Rebuild MTGCardBelcher image pool** from the replying subreddit's mod menu, instead of waiting for the next 30-minute run.
 

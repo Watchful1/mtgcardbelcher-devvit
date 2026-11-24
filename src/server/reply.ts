@@ -10,7 +10,7 @@ import {
   LINKLESS_REPLIES,
   REVEL_IN_RICHES_IMAGE,
   SPECIAL_HEADERS,
-} from './data/replies';
+} from './data/reply-texts';
 
 export const MAX_CALLS = 8;
 export const MAX_REPLY_LENGTH = 2400;
@@ -21,7 +21,7 @@ export const ROLL_OUTCOMES = 1002;
 
 export interface ReplyInputs {
   calls: string[];
-  /** Joke image URLs to pick from. Never empty: it always holds Jollyver. */
+  /** Joke image URLs to pick from. Empty only when `needsCardData` is false. */
   pool: string[];
   /** Returns a number in [0, 1), like Math.random. */
   rng: () => number;

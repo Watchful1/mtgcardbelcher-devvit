@@ -69,7 +69,5 @@ export function highestPriorityCollectible(calls: string[]): Collectible | undef
 }
 
 export function renderArt(collectible: Collectible, count: number): string {
-  const number = String(count);
-  if (number.length > 4) throw new Error(`${collectible.name} collector number ${count} has more than 4 digits`);
-  return collectible.art.replaceAll('{{COUNT}}', number.padStart(4, '0'));
+  return collectible.art.replaceAll('{{COUNT}}', String(count).padStart(4, '0'));
 }

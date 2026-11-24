@@ -3,7 +3,7 @@
 
 import { context, reddit, settings } from '@devvit/web/server';
 
-import { CURATION_DRY_RUN_SETTING } from '../config';
+import { CURATION_DRY_RUN_SETTING, isDryRun } from '../config';
 import { sameSubreddit, SOURCE_SUBREDDIT, type SourcePost } from '../flair-rules';
 import { asPostId } from '../ids';
 import { PAGE_SIZE, scanPool, type Curation, type Page } from '../image-pool';
@@ -14,20 +14,23 @@ const RUN_BUDGET_MS = 20_000;
 
 async function fetchPage(after: string | undefined): Promise<Page> {
   const posts = await reddit
-    .getNewPosts({ subredditName: SOURCE_SUBREDDIT, limit: PAGE_SIZE, pageSize: PAGE_SIZE, ...(after ? { after } : {}) })
+    .getNewPosts({
+      subredditName: SOURCE_SUBREDDIT,
+      limit: PAGE_SIZE,
+      pageSize: PAGE_SIZE,
+      ...(after ? { after } : {}),
+    })
     .all();
   return {
-    posts: posts.map(
-      (post): SourcePost => ({
-        id: post.id,
-        flairId: post.flair?.templateId || undefined,
-        approved: post.approved,
-        removed: post.removed,
-        createdAtMs: post.createdAt.getTime(),
-        score: post.score,
-        url: post.url,
-      }),
-    ),
+    posts: posts.map((post): SourcePost => ({
+      id: post.id,
+      flairId: post.flair?.templateId || undefined,
+      approved: post.approved,
+      removed: post.removed || post.spam,
+      createdAtMs: post.createdAt.getTime(),
+      score: post.score,
+      url: post.url,
+    })),
     after: posts.length === PAGE_SIZE ? posts.at(-1)?.id : undefined,
   };
 }
@@ -47,10 +50,13 @@ async function curation(): Promise<Curation | undefined> {
   }
   return {
     setFlair: async (postId, flairId) => {
-      await reddit.setPostFlair({ subredditName: SOURCE_SUBREDDIT, postId: asPostId(postId), flairTemplateId: flairId });
+      await reddit.setPostFlair({
+        subredditName: SOURCE_SUBREDDIT,
+        postId: asPostId(postId),
+        flairTemplateId: flairId,
+      });
     },
-    // Unset counts as on, so curation can't change flairs until someone turns it off.
-    dryRun: (await settings.get<boolean>(CURATION_DRY_RUN_SETTING)) ?? true,
+    dryRun: isDryRun(await settings.get(CURATION_DRY_RUN_SETTING)),
   };
 }
 
@@ -59,7 +65,7 @@ async function curation(): Promise<Curation | undefined> {
  * every 30 minutes, on install and from the menu. Returns the number of
  * images, or undefined if the scan failed and the old pool was kept.
  */
-export async function poolTick(): Promise<number | undefined> {
+export async function rebuildPool(): Promise<number | undefined> {
   const deadline = Date.now() + RUN_BUDGET_MS;
   try {
     return await scanPool({
@@ -73,12 +79,4 @@ export async function poolTick(): Promise<number | undefined> {
     console.error(`Image pool scan failed, keeping the old pool: ${String(error)}`);
     return undefined;
   }
-}
-
-/** For the rebuild menu item. Returns the toast. */
-export async function rebuildPool(): Promise<string> {
-  const images = await poolTick();
-  return images === undefined
-    ? 'Rebuilding the image pool failed; the old pool is kept. See the log.'
-    : `The image pool has ${images} images from r/${SOURCE_SUBREDDIT}.`;
 }

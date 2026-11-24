@@ -40,7 +40,12 @@ export type SkipReason = 'too-old' | 'ignored-author' | 'no-calls' | 'excluded-t
  * Why an item gets no reply, or undefined if it should get one.
  * `appUsername` is the app's own account, which is skipped like the PRAW bots.
  */
-export function skipReason(item: CallItem, calls: string[], appUsername: string, nowMs: number): SkipReason | undefined {
+export function skipReason(
+  item: CallItem,
+  calls: string[],
+  appUsername: string,
+  nowMs: number,
+): SkipReason | undefined {
   if (nowMs - item.createdAtMs > MAX_ITEM_AGE_MS) return 'too-old';
   const author = item.authorName.toLowerCase();
   if (author === appUsername.toLowerCase() || IGNORED_AUTHORS.includes(author)) return 'ignored-author';

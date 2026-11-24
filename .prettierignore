@@ -1,0 +1,5 @@
+dist
+package-lock.json
+*.md
+devvit.json
+src/server/data/art.ts

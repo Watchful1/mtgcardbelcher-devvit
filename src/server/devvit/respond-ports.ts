@@ -7,16 +7,14 @@ import { RateLimitedError, withRateLimitRetry } from '../rate-limit';
 import type { RespondPorts } from '../respond';
 import { lookupCards, randomFlavour } from '../scryfall';
 import type { Store } from '../store';
-import { collectorNumberFloor } from './counters';
+import { collectorNumberFloor } from './collector-numbers';
 import { appUsername, store } from './platform';
 
 /**
- * Posts a reply, unless Reddit's rate limit is in force. A limit too long to
- * wait out is remembered, so later replies skip straight past it until it ends.
+ * Posts a reply. A rate limit too long to wait out is remembered, so `respond`
+ * skips later replies until it ends.
  */
 async function postReply(db: Store, parentId: string, text: string): Promise<string> {
-  const until = await db.rateLimitedUntil();
-  if (until !== undefined) throw new RateLimitedError(until);
   try {
     const comment = await withRateLimitRetry(() => reddit.submitComment({ id: asParentId(parentId), text }));
     return comment.id;

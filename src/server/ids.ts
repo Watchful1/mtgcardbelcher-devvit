@@ -1,5 +1,5 @@
-// Reddit ids: comments are t1_…, posts t3_…. Payloads and settings sometimes
-// give them without the prefix.
+// Reddit ids: comments are t1_…, posts t3_…. Trigger payloads can give
+// them without the prefix.
 
 export type CommentId = `t1_${string}`;
 export type PostId = `t3_${string}`;

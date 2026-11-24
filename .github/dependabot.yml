@@ -1,37 +1,24 @@
-# Dependabot configuration to update npm packages weekly
+# One pull request a month with the minor and patch updates. Major versions are
+# left out, because they can need code changes; update those by hand.
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/" # Location of your package.json and package-lock.json
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "cron"
-      cronjob: "0 17 * * 1,2" # At 5pm on Monday and Tuesday - https://crontab.guru/
-      timezone: "America/New_York"
-    open-pull-requests-limit: 10 # Optional: prevents PR spam by limiting active updates
+      interval: 'monthly'
     ignore:
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
-    cooldown:
-      # Wait a week after a release before proposing it, except for Devvit's own packages.
-      default-days: 7
-      exclude:
-        - "devvit"
-        - "@devvit/*"
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     groups:
-      devvit:
-        patterns:
-          - "devvit"
-          - "@devvit/*"
-      eslint:
-        patterns:
-          - "eslint"
-          - "@eslint/*"
-          - "typescript-eslint"
-      vite:
-        patterns:
-          - "vite"
-          - "@vitejs/*"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+      npm:
+        patterns: ['*']
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      actions:
+        patterns: ['*']

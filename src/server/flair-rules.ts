@@ -43,7 +43,7 @@ export interface SourcePost {
   flairId: string | undefined;
   /** Whether a moderator has approved the post. */
   approved: boolean;
-  /** Whether a moderator has removed the post. */
+  /** Whether the post has been removed, including as spam. */
   removed: boolean;
   createdAtMs: number;
   score: number;

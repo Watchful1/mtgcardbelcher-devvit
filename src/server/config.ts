@@ -13,6 +13,17 @@ export const COLLECTOR_NUMBER_SETTINGS: Record<Collectible['id'], string> = {
   negate: 'negateCollectorNumber',
 };
 
-// Global setting: while true (the default), curation logs the flair changes it
-// would make and makes none.
+// Global setting: while on (the default), curation logs the flair changes it
+// would make and makes none. It's a string because `devvit settings set` stores
+// text, and Devvit reads any text in a boolean setting, even "false", as true.
 export const CURATION_DRY_RUN_SETTING = 'curationDryRun';
+
+/** Only "false" turns dry run off, so curation can't change flairs until someone asks for it. */
+export function isDryRun(setting: unknown): boolean {
+  return String(setting).trim().toLowerCase() !== 'false';
+}
+
+/** A collector number setting, or `fallback` if it isn't a whole number of 0 or more. */
+export function collectorNumberOr(setting: unknown, fallback: number): number {
+  return typeof setting === 'number' && Number.isSafeInteger(setting) && setting >= 0 ? setting : fallback;
+}

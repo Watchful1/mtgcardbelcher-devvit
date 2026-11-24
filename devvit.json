@@ -58,9 +58,9 @@
     },
     "global": {
       "curationDryRun": {
-        "type": "boolean",
-        "label": "Curation dry run: log the flair changes curation would make on r/MTGCardBelcher, and make none",
-        "defaultValue": true
+        "type": "string",
+        "label": "Curation dry run (true or false): log the flair changes curation would make on r/MTGCardBelcher, and make none",
+        "defaultValue": "true"
       }
     }
   },

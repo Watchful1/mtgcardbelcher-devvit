@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { FLAIRS, type SourcePost } from './flair-rules';
-import { isPoolImage, JOLLYVER, MAX_PAGES, scanPool, type Page, type ScanPorts } from './image-pool';
+import { JOLLYVER } from './data/reply-texts';
+import { isPoolImage, MAX_PAGES, scanPool, type Page, type ScanPorts } from './image-pool';
 import { Store } from './store';
 import { FakeRedis } from './testing/fake-redis';
 
@@ -87,10 +88,21 @@ test('a scan stops at the newest 1,000 posts', async () => {
 });
 
 test('a scan that runs out of time keeps the old pool', async () => {
-  const { ports, store, pool } = setup([post('a', 1), post('b', 2), post('c', 3)], { pageSize: 1, pagesBeforeTimeout: 2 });
+  const { ports, store, pool } = setup([post('a', 1), post('b', 2), post('c', 3)], {
+    pageSize: 1,
+    pagesBeforeTimeout: 2,
+  });
   await store.setPool(['https://i.redd.it/old.png']);
   assert.equal(await scanPool(ports), undefined);
   assert.deepEqual(await pool(), ['https://i.redd.it/old.png']);
+});
+
+test('a scan that runs out of time setting flairs stops within the page', async () => {
+  const pending = { flairId: FLAIRS.pending, score: 60 };
+  const { ports, flairsSet } = setup([post('a', 1, pending), post('b', 2, pending)], { curate: 'live' });
+  ports.timeLeft = () => flairsSet.length === 0;
+  assert.equal(await scanPool(ports), undefined);
+  assert.deepEqual(flairsSet, [['a', FLAIRS.approved]]);
 });
 
 test('installs other than r/MTGCardBelcher never set flairs', async () => {
@@ -128,9 +140,12 @@ test('curation moves posts along, and a post it approves joins the pool in the s
 });
 
 test('a dry run changes no flairs, and the pool follows the flairs as they are', async () => {
-  const { ports, flairsSet, pool } = setup([post('hit', 2, { flairId: FLAIRS.pending, score: 60 }), post('settled', 3)], {
-    curate: 'dry-run',
-  });
+  const { ports, flairsSet, pool } = setup(
+    [post('hit', 2, { flairId: FLAIRS.pending, score: 60 }), post('settled', 3)],
+    {
+      curate: 'dry-run',
+    },
+  );
   await scanPool(ports);
   assert.deepEqual(flairsSet, []);
   assert.deepEqual(await pool(), ['https://i.redd.it/settled.png']);

@@ -3,9 +3,26 @@
 export const FOOTER = '*********\n\nSubmit your content at: r/MTGCardBelcher';
 
 export const CREATURE_TYPES = [
-  'Horrors', 'Kobolds', 'Goblins', 'Zombies', 'Vampires', 'Werewolves', 'Legitimate Businesspeople',
-  'Brushwaggs', 'Camarids', 'Giants', 'Devils', 'Hydras', 'Krakens', 'Nightmares', 'Dragons',
-  'Cyclopes', 'Skeletons', 'Dreadnoughts', 'Wurms', 'Leviathans',
+  'Horrors',
+  'Kobolds',
+  'Goblins',
+  'Zombies',
+  'Vampires',
+  'Werewolves',
+  'Legitimate Businesspeople',
+  'Brushwaggs',
+  'Camarids',
+  'Giants',
+  'Devils',
+  'Hydras',
+  'Krakens',
+  'Nightmares',
+  'Dragons',
+  'Cyclopes',
+  'Skeletons',
+  'Dreadnoughts',
+  'Wurms',
+  'Leviathans',
 ];
 
 export function creatureHeader(creature: string): string {
@@ -27,6 +44,9 @@ export const LINKLESS_REPLIES = [
   'Instead of looking for any cards you stop to admire the marvels of nature:\n\n[The Nature Is Wonderful](https://i.redd.it/cwhcrm1b74fd1.png)\n\n',
   'Turns out bottled mail takes forever to arrive...\n\n[You See a Messenger in the Distance](https://i.redd.it/tzcajj1wcjed1.jpeg)\n\n',
 ];
+
+// The joke image that is always in the pool, in memory of u/MTGLardFetcher.
+export const JOLLYVER = 'https://i.redd.it/pcmd6d3o1oad1.png';
 
 // Revel in Riches always links to the Negate screenshot.
 export const REVEL_IN_RICHES_IMAGE = 'https://i.redd.it/7jkequbnkrzd1.png';

@@ -22,7 +22,7 @@ The joke images are posts on r/MTGCardBelcher. A new image post waits for a mode
 
 ## Installing it
 
-Moderators can install the app on their subreddit from its page on developers.reddit.com. It then answers calls in new comments and posts there; nothing else needs setting up. The bot skips weekly unjerk threads.
+The app is unlisted, so only its owner can install it, on subreddits where they're a moderator with full permissions ([how](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md#releasing)). It then answers calls in new comments and posts there; nothing else needs setting up. The bot skips weekly unjerk threads.
 
 On r/MTGCardBelcher itself, the app answers no calls; it moves image posts through the flairs above. It must be a moderator there to do that.
 
@@ -33,12 +33,10 @@ On r/MTGCardBelcher itself, the app answers no calls; it moves image posts throu
 - [docs/features.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/features.md): every reply and rule in detail.
 - [docs/operations.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/operations.md): reading the logs and fixing problems.
 - [docs/development.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/development.md): the code, settings, testing and releases.
-- [docs/runbooks/handover.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/runbooks/handover.md): moving the app onto u/MTGCardBelcher, installing it, and handing the repo to the original bot's owner.
-- [docs/migration-plan.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/migration-plan.md) and [docs/runbooks/playtest.md](https://github.com/Watchful1/mtgcardbelcher-devvit/blob/main/docs/runbooks/playtest.md): how the port from the original Python bot, [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher), was planned and tested.
 
 ## App Migration Program
 
-This app replaces the Data API bot u/MTGCardBelcher, a PRAW script. Reddit has moved the app onto the u/MTGCardBelcher account, so it replies under the original bot's name.
+This app replaces the Data API bot u/MTGCardBelcher, the PRAW script [AetheriumSlinky/MTGCardBelcher](https://github.com/AetheriumSlinky/MTGCardBelcher). Reddit has moved the app onto the u/MTGCardBelcher account, so it replies under the original bot's name.
 
 ## Fetch Domains
 

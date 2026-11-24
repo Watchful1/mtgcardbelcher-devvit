@@ -8,9 +8,9 @@ import type {
 } from '@devvit/web/shared';
 
 import { asCommentId, asPostId } from '../server/ids';
-import { poolTick } from '../server/devvit/image-pool';
+import { rebuildPool } from '../server/devvit/run-pool-scan';
 import { sameSubreddit, SOURCE_SUBREDDIT } from '../server/flair-rules';
-import { respondPorts } from '../server/devvit/replies';
+import { respondPorts } from '../server/devvit/respond-ports';
 import { respond, type CallTarget } from '../server/respond';
 
 export const triggers = new Hono();
@@ -68,6 +68,6 @@ triggers.post('/on-app-install', async (c) => {
   const input = await c.req.json<OnAppInstallRequest>();
   console.log('App installed to subreddit: r/' + input.subreddit?.name);
   // Fill the image pool straight away, rather than at the next scheduled scan.
-  await poolTick();
+  await rebuildPool();
   return c.json(ok, 200);
 });

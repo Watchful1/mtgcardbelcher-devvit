@@ -34,7 +34,8 @@ export function cardImages(card: Card): string[] {
  */
 export async function lookupCards(calls: string[], fetchFn: Fetch = fetch): Promise<Map<string, string[]>> {
   const found = new Map<string, string[]>();
-  const names = [...new Set(calls.map((call) => call.toLowerCase()))];
+  // One empty name, as in [[//]], makes Scryfall refuse the whole request.
+  const names = [...new Set(calls.map((call) => call.toLowerCase()))].filter((name) => identifierName(name) !== '');
   if (names.length === 0) return found;
 
   const response = await request<{ data: Card[]; not_found: { name: string }[] }>(fetchFn, `${API}/cards/collection`, {

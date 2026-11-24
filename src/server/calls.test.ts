@@ -45,5 +45,8 @@ test('skips old items, bots and items without calls', () => {
 test('skips weekly unjerk threads for comments, and bottom scoring for posts only', () => {
   assert.equal(skipReason(item({ postTitle: 'The Weekly Unjerk Thread' }), ['Bolt'], 'app', NOW), 'excluded-thread');
   assert.equal(skipReason(item({ postTitle: 'Bottom 5 scoring posts' }), ['Bolt'], 'app', NOW), undefined);
-  assert.equal(skipReason(item({ kind: 'post', postTitle: 'Bottom 5 scoring posts' }), ['Bolt'], 'app', NOW), 'excluded-thread');
+  assert.equal(
+    skipReason(item({ kind: 'post', postTitle: 'Bottom 5 scoring posts' }), ['Bolt'], 'app', NOW),
+    'excluded-thread',
+  );
 });

@@ -41,7 +41,15 @@ function setup(overrides: Partial<RespondPorts> = {}) {
 }
 
 function target(body: string, overrides: Partial<CallTarget> = {}): CallTarget {
-  return { id: 't1_abc', kind: 'comment', body, authorName: 'someone', createdAtMs: NOW, postTitle: 'A post', ...overrides };
+  return {
+    id: 't1_abc',
+    kind: 'comment',
+    body,
+    authorName: 'someone',
+    createdAtMs: NOW,
+    postTitle: 'A post',
+    ...overrides,
+  };
 }
 
 test('replies to a call with a joke link, the Scryfall link and flavour', async () => {
@@ -49,7 +57,10 @@ test('replies to a call with a joke link, the Scryfall link and flavour', async 
   assert.equal(await respond(target('[[Lightning Bolt]]'), ports), 'reply');
   assert.equal(replies.length, 1);
   assert.equal(replies[0]!.parentId, 't1_abc');
-  assert.match(replies[0]!.text, /\[Lightning Bolt\]\(https:\/\/i\.redd\.it\/pcmd6d3o1oad1\.png\) - \(\[SF\]\(https:\/\/sf\/bolt\.jpg\)\)/);
+  assert.match(
+    replies[0]!.text,
+    /\[Lightning Bolt\]\(https:\/\/i\.redd\.it\/pcmd6d3o1oad1\.png\) - \(\[SF\]\(https:\/\/sf\/bolt\.jpg\)\)/,
+  );
   assert.match(replies[0]!.text, /_It burns\._/);
 });
 
@@ -79,7 +90,10 @@ test('a collectible gives numbered art, then waiting replies until the cooldown 
 
   // rng 0.5 puts the cooldown halfway between 10 minutes and 2 hours.
   advance(66 * 60 * 1000);
-  assert.equal(await respond(target('[[Colossal Dreadmaw]]', { id: 't1_3', createdAtMs: NOW + 66 * 60 * 1000 }), ports), 'art');
+  assert.equal(
+    await respond(target('[[Colossal Dreadmaw]]', { id: 't1_3', createdAtMs: NOW + 66 * 60 * 1000 }), ports),
+    'art',
+  );
   assert.match(replies[2]!.text, /No\. 0043/);
 });
 
@@ -128,4 +142,14 @@ test('if taking a collector number fails, no art goes out and the cooldown is gi
   fail = false;
   assert.equal(await respond(target('[[Storm Crow]]', { id: 't1_b' }), ports), 'art');
   assert.equal(replies.length, 1);
+});
+
+test('while Reddit rate-limits the app, no reply goes out and no collector number is used', async () => {
+  const { ports, replies, advance } = setup();
+  await ports.store.setRateLimitedUntil(NOW + 60_000);
+  await assert.rejects(respond(target('[[Storm Crow]]'), ports), /rate-limited by Reddit until/);
+  assert.equal(replies.length, 0);
+  advance(61_000);
+  assert.equal(await respond(target('[[Storm Crow]]', { id: 't1_next' }), ports), 'art');
+  assert.match(replies[0]!.text, /0042/);
 });
